@@ -1,0 +1,10 @@
+{
+    "basilico":{
+        "temperatura": 24,
+        "umidita": 30
+    },
+    "rosmarino":{
+      "temperatura": 26,
+      "umidita": 25
+    }
+}

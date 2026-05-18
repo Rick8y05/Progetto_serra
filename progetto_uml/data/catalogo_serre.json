@@ -1,0 +1,14 @@
+{
+    "sr-50010":{
+        "proprietario": "Alessio Menotti",
+	"pasword":"Rudi1970!",
+        "modalita": "automatico",
+	"pianta_selezionata": "basilico"
+    },
+    "sr-50011":{
+    "proprietario": "Giovanni Bertozzi",
+	"pasword":"GioBerto",
+        "modalita": "manuale",
+	"pianta_selezionata": "rosmarino"
+    }
+}

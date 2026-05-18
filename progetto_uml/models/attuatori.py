@@ -1,0 +1,14 @@
+class Attuatori:
+    def __init__(self,tipo: str, stato: bool):
+        self.tipo = tipo
+        self.stato = stato
+    @property
+    def _stato(self):
+        return self.stato
+    @property
+    def _tipo(self):
+        return self.tipo
+    def accendi(self):
+        self.stato = True
+    def spegni(self):
+        self.stato = False
