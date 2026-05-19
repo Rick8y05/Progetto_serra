@@ -1,4 +1,4 @@
-from repositories.dati_repository import DatiRepository
+from repository.dati_repository import DatiRepository
 
 class Utente:
     utenti_registrati = {}
