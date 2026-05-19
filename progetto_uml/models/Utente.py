@@ -3,7 +3,7 @@ from repositories.dati_repository import DatiRepository
 class Utente:
     utenti_registrati = {}
 
-    # repository per il file utenti
+    # repository collegato al file utenti.json
     repo = DatiRepository("data/utenti.json", list)
 
     def __init__(self, email, password):
@@ -12,56 +12,61 @@ class Utente:
 
     @classmethod
     def carica_utenti(cls):
-        """Carica gli utenti dal repository in memoria"""
-        dati = cls.repo.get_dati()
-
-        if not isinstance(dati, list):
-            dati = []
+        # Carica gli utenti dal file JSON tramite repository
+        dati = cls.repo.get_dati
 
         cls.utenti_registrati = {
-            u["email"]: u["password"]
-            for u in dati
-            if isinstance(u, dict) and "email" in u and "password" in u
+            utente["email"]: utente["password"]
+            for utente in dati
+            if isinstance(utente, dict) and "email" in utente and "password" in utente
         }
 
     @classmethod
     def salva_utenti(cls):
-        """Salva gli utenti su file tramite repository"""
+        # Salva gli utenti nel file JSON
         dati = [
-            {"email": email, "password": password}
+            {
+                "email": email,
+                "password": password
+            }
             for email, password in cls.utenti_registrati.items()
         ]
-
         cls.repo.save(dati)
 
     def login(self):
-        """Verifica credenziali"""
+        # Verifica credenziali utente
         return (
-            self.email in Utente.utenti_registrati and
+            self.email in Utente.utenti_registrati
+            and
             Utente.utenti_registrati[self.email] == self.password
         )
 
+    # Logout utente
     def logout(self):
         print("Logout effettuato")
 
+    # Registra un nuovo utente
     def registra(self):
-        """Registra nuovo utente"""
         if self.email in Utente.utenti_registrati:
+            print("Email già registrata")
             return False
 
         if len(self.password) < 6:
+            print("Password troppo corta")
             return False
 
         Utente.utenti_registrati[self.email] = self.password
         Utente.salva_utenti()
+        print("Registrazione completata")
         return True
 
+    # Controlla se l'email inserita esiste già nel sistema
     def email_esiste(self):
         return self.email in Utente.utenti_registrati
 
+    # Controlla se la password inserita è già stata utilizzata
     def password_usata(self):
         return self.password in Utente.utenti_registrati.values()
 
-
-# inizializzazione automatica
+# caricamento automatico utenti all'avvio
 Utente.carica_utenti()
