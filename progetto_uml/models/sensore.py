@@ -24,4 +24,3 @@ class Sensori:
         return self.tipo
 
 
-
