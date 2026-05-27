@@ -1,0 +1,22 @@
+[
+    {
+        "email": "mario.rossi@gmail.com",
+        "password": "MarioRossi.99",
+        "ruolo": "proprietario"
+    },
+    {
+        "email": "giuseppe.bianchi@gmail.com",
+        "password": "GiuseppeBianchi.99",
+        "ruolo": "operatore"
+    },
+    {
+        "email": "antonio.pierini@gmail.com",
+        "password": "AntonioPierini.99",
+        "ruolo": "operatore"
+    },
+    {
+        "email": "leonardo.barelli@gmail.com",
+        "password": "Roma.1927",
+        "ruolo": "proprietario"
+    }
+]
