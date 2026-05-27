@@ -21,4 +21,12 @@ class DatiRepository:
     def get_dati(self):
         self.dati = self.read() #manda i dati salvati indietro
         return self.dati
-    
+
+    def salvatggio_dati(self, dati):#path non lo istanziamo metiamo self perchè poi ogni repository è istanziata nel main e quindi sa in che file pescare
+        try:
+            with open(self.path, "w", encoding="utf-8") as file:
+                json.dump(dati, file, indent=4)
+            # json.dump serve per fissare i dati dalla ram alla memoria
+            print("salvataggio effetuato con successo")
+        except Exception as e:
+            print(f"errore durante il salavataggio {e}")
