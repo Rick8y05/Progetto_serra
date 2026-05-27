@@ -1,118 +1,136 @@
-from repository.lettore_dati import DatiRepository
+
 from models.serra import Serra
 class GestoreSerra:
-    def __init__ (self,path_raccolta_serre: str, path_dati_colture: str, path_temperature: str, path_umidita: str):
-        self.path_temperature = path_temperature
-        self.path_umidita = path_umidita
-        self.path_dati_colture = path_dati_colture
-        self.path_raccolta_serre = path_raccolta_serre
-        self.dati_serra: dict = DatiRepository(self.path_raccolta_serre, dict).get_dati# tutti i dati reltivi alle singole serre
+    def __init__ (self,dati_serra: dict, dati_temperature, dati_umidita, gestore_colture): #ricordati che è listanza del gestore colture nel main se non funziona devi toglierla
+        self.dati_temperatura = dati_temperature
+        self.dati_umidita = dati_umidita
+        self.gestore_colture = gestore_colture
+        self.dati_serra = dati_serra
         #dizionario di dizionari organizzato per codice univoco con sotto tutto per creare serra
-        self.serre_attive=[]#lista per mantenere vivi gli oggetti serra
+        self.serre_attive={} #dizionario per mantenere vivi gli oggetti serra
+        #usi ["modalita"]quando dizionario .modalita quando è un attributo di un oggetto istanziato
         for n_univoco, info_serra in self.dati_serra.items():
-            serra_attivata=Serra(info_serra["proprietario"],path_dati_colture,info_serra["modalita"],self.path_temperature, self.path_umidita,n_univoco) #attiva una delle serre salvate
-            self.serre_attive.append(serra_attivata)#la mette dentro una lista di serre per mantenerla salvata
+            #sistemare sotto il discorso che manda path colture, deve mandare solo dati della serra giusta
+            nome_pianta = info_serra["pianta_selezionata"]
+            dati_singola_pianta = self.gestore_colture.configurazione_parametri_coltura(nome_pianta)
+            serra_attivata=Serra(info_serra["proprietario"],dati_singola_pianta,info_serra["modalita"],self.dati_temperatura, self.dati_umidita,n_univoco, nome_pianta) #attiva una delle serre salvate
+            self.serre_attive[n_univoco]=serra_attivata#la mette dentro una lista di serre per mantenerla salvata
         # definire gestione_parco_serre
     def visualizza_stato_serre(self,n_univoco):
-        umidita=self.serre_attive[n_univoco].get_umidita_serra
-        temperatura=self.serre_attive[n_univoco].get_temperatura_serra
-        stato_ventole=self.serre_attive[n_univoco].get_stato_ventole_serra
-        stato_impianto_irrigazione=self.serre_attive[n_univoco].get_stato_impianto_irrigazione
-        stato_lampada_uv=self.serre_attive[n_univoco].get_stato_lampadauv
-        return [umidita,temperatura,stato_ventole,stato_impianto_irrigazione,stato_lampada_uv]
-    def verifica_esistenza_serra(self):#controlla che il codice univoco sia oresente
-    #gestoreParcoSerra ricordarsi di mettere controolo con try except
-        pass
+        try:
+            umidita = self.serre_attive[n_univoco].get_umidita_serra
+            temperatura = self.serre_attive[n_univoco].get_temperatura_serra
+            stato_ventole = self.serre_attive[n_univoco].get_stato_ventole
+            stato_impianto_irrigazione = self.serre_attive[n_univoco].get_stato_sistema_irrigazione
+            stato_lampadaUV = self.serre_attive[n_univoco].get_stato_lampadaUV
+            modalita = self.serre_attive[n_univoco].modalita
+            return [umidita,temperatura,stato_ventole,stato_impianto_irrigazione,stato_lampadaUV,modalita]
+        except KeyError:
+            print(f"Il codice {n_univoco} non esiste ")
+            return []
 
 
 
-class SerraService:
-
-    def __init__(self, path_serre, path_colture, path_temperature, path_umidita):
-
-        self.path_serre = path_serre
-        self.path_colture = path_colture
-        self.path_temperature = path_temperature
-        self.path_umidita = path_umidita
-
-        self.repo_serre = DatiRepository(self.path_serre, dict)
-        self.dati_serre = self.repo_serre.get_dati or {}
-
-        self.serre = {}
-
-        for codice, info in self.dati_serre.items():
-
-            codice = codice.strip().lower()
-
-            self.serre[codice] = Serra(
-                info.get("proprietario"),
-                info.get("coltura", "default"),
-                info.get("modalita", "manuale"),
-                self.path_temperature,
-                self.path_umidita,
-                codice
-            )
-
-    def get_serra(self, codice):
-        return self.serre.get(codice.strip().lower())
-    
-    def configura_coltura(self, codice_serra, coltura):
-        serra = self.get_serra(codice_serra)
-        if not serra:
-            print("Serra non trovata")
-            return
-        serra.coltura = coltura
-
-    def azione_manuale(self, codice, dispositivo, stato):
-
-        serra = self.get_serra(codice)
-
-        if not serra:
-            print("SERRA NON TROVATA")
-            return
-
-        stato_bool = stato.lower() == "on"
-
-        if dispositivo == "1":
-            serra.set_ventole(stato_bool)
-        elif dispositivo == "2":
-            serra.set_irrigazione(stato_bool)
-        elif dispositivo == "3":
-            serra.set_lampada_uv(stato_bool)
+    def verifica_esistenza_serra(self, n_univoco):
+        return n_univoco in self.serre_attive #se presente rilascia true altrimenti false
+    #controlla che il codice univoco sia presente
+    # aggiungi e rimuovi serra non rimuovono dal database cambiano i propietari e asseganno ad uno nuovo
+    #serve per aggiungere un proprietario ad una serra vuota
+    def aggiungi_serra(self,n_univoco,proprietario):
+       if self.verifica_esistenza_serra(n_univoco):
+            if self.serre_attive[n_univoco].proprietario=="nessuno":
+                self.serre_attive[n_univoco].proprietario=proprietario
+                print("serra registrata con proprietario corretto")
+            else:
+                print("codice univoco già utilizzato da un altro utente")
+       else:
+           print("numero univoco inesistente")
+#queste servono cosi che il proprietario puo essere rimosso da una serra
+    def rimuovi_serra(self,n_univoco,proprietario: str):
+        if self.verifica_esistenza_serra(n_univoco):
+            if self.serre_attive[n_univoco].proprietario== proprietario:
+                self.serre_attive[n_univoco].proprietario = "nessuno"
+                print("serra eliminata correttamente")
+            else:
+                print("questa serra apparrtiene ad un altro proprietario")
         else:
-            print("Dispositivo non valido")
-
-        print("OK")
-
-    def set_modalita(self, modalita):
-        for s in self.serre.values():
-            s.modalita = "automatica" if modalita == "1" else "manuale"
-
-    def esegui_ciclo_automatico(self):
-        for s in self.serre.values():
-            s.mod_automatica()
-
-    def leggi_stato_serra(self, codice):
-        serra = self.get_serra(codice)
-
-        if not serra:
-            return None
-
-        return serra
-    
-    def get_dati_plancia(self):
-        serra = self.repository.get_serra_attiva()
-
-        if serra is None:
-            return None
-
-        return {
-            "ventole": serra.ventole,
-            "irrigazione": serra.irrigazione,
-            "lampada_uv": serra.lampada_uv,
-            "temperatura": serra.temperatura_serra,
-            "umidita": serra.umidita_serra,
-            "coltura": serra.coltura
-        }
+            print("numero univoco inesistente")
+    def selezione_modalita(self,n_univoco,modalita):
+        modalita_pulita = modalita.lower()
+        if modalita_pulita=="automatico":
+            self.serre_attive[n_univoco].modalita= modalita_pulita
+            self.serre_attive[n_univoco].mod_automatica()
+            print("modalita modificata, messa automatica")
+        elif modalita_pulita=="manuale":
+            self.serre_attive[n_univoco].modalita = modalita_pulita
+        #di default disattiva tutti attuatori
+            self.serre_attive[n_univoco].mod_manuale_ventole(False)
+            self.serre_attive[n_univoco].mod_manuale_sistema_irrigazione(False)
+            self.serre_attive[n_univoco].mod_manuale_lampada_UV(False)
+            print("modalita modificata, messa manuale")
+        else:
+            print("modalita non esiste ")
 
 
+    def modifica_coltura_serra(self,n_univoco,pianta):
+        if self.verifica_esistenza_serra(n_univoco):
+            pianta_selezionata = self.gestore_colture.configurazione_parametri_coltura(pianta)
+            self.serre_attive[n_univoco].set_coltura(pianta_selezionata, pianta)
+        else:
+            print("numero univoco inesistente")
+#elimina una serra dal catalogo
+    def elimina_serra(self, n_univoco: str):
+        if self.verifica_esistenza_serra(n_univoco):
+            self.serre_attive.pop(n_univoco)
+        else:
+            print("numero univoco inesistente")
+#aggiunge una serra senza dati al catalogo poi i dati vengono inseriti dopo
+    def nuova_serra(self, n_univoco: str):
+        if self.verifica_esistenza_serra(n_univoco):
+            print("questo codice univoco è gia presente")
+        else:
+            dati = {"proprietario": "nessuno",
+                    "modalita": "manuale",
+	                "pianta_selezionata": "basilico"
+                }
+            self.serre_attive[n_univoco] = dati
+
+#vedere come gestire il discorso delle pasword con leo
+#ricorda che gestore_serra è il nome del gesotre nel main, devi dargli una istanza fisica senno non puoi richiamre la singola classe
+    @property
+    def dati_salvataggio(self):
+        dati_salvataggio = {}
+        for n_univoco, dati_serre in self.serre_attive.items():
+            dati_salvataggio[n_univoco] = {"proprietario": dati_serre.proprietario,
+                    "modalita": dati_serre.modalita,
+	                "pianta_selezionata": dati_serre.nome_pianta
+                }
+        return dati_salvataggio
+
+    def get_modalita(self, n_univoco):
+        if self.verifica_esistenza_serra(n_univoco):
+            mod = self.serre_attive[n_univoco].modalita
+            return mod
+        else:
+            print("numero univoco inesistente")
+            return "nessuna modalita"
+
+    def gestione_manuale_irrigatore(self,n_univoco,stato):
+        self.serre_attive[n_univoco].mod_manuale_sistema_irrigazione(stato)
+        return self.serre_attive[n_univoco].get_stato_sistema_irrigazione
+
+    def gestione_manuale_ventole(self,n_univoco,stato):
+        self.serre_attive[n_univoco].mod_manuale_ventole(stato)
+        return self.serre_attive[n_univoco].get_stato_ventole
+
+    def gestione_manuale_lampadaUV(self,n_univoco,stato):
+        self.serre_attive[n_univoco].mod_manuale_lampada_UV(stato)
+        return self.serre_attive[n_univoco].get_stato_lampadaUV
+    #questo metodo sotto serve per dire le seere che ha a disposizione il proprietario quindi solamente
+    #quelle che puo usare, cosi che non si rischia che riesce a controllare serre non sue
+    def parco_serre_proprietario(self,proprietario: str):
+        serre_proprietario = []
+        for n_univoco, serra in self.serre_attive.items():#.items(): il ciclo dice per ogni n_univoco ho serre in serre attive, items restituisce la chiave e loggetto serra
+            if serra.proprietario == proprietario:
+                serre_proprietario.append(n_univoco)
+        return serre_proprietario
