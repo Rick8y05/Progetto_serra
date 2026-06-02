@@ -20,12 +20,12 @@ class Autenticazione:
 
         for u in utenti:
             if u["email"] == email and u["password"] == password:
-                return Utente(u["email"], u["password"], u["ruolo"])
+                return Utente(u["nome"], u["email"], u["password"], u["ruolo"],)
 
         return None
 
     # registrazione proprietario
-    def register_proprietario(self, email, password):
+    def register_proprietario(self, nome, email, password):
         email = email.strip()
         password = password.strip()
 
@@ -36,6 +36,7 @@ class Autenticazione:
                 return False
 
         utenti.append({
+            "nome": nome,
             "email": email,
             "password": password,
             "ruolo": self.PROPRIETARIO
@@ -43,7 +44,7 @@ class Autenticazione:
 
         self.repo.save_all(utenti)
         return True
-
+    
     # utenti
     def get_utenti(self):
         utenti = self.repo.get_all()
