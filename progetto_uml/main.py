@@ -1,8 +1,6 @@
 from menu.menu import Menu
 from menu.menu_proprietario import start_menu_proprietario
 from menu.menu_operatore import start_menu_operatore
-import repository
-from repository.lettore_dati import DatiRepository
 from services.serra_services import SerraService
 import time
 
@@ -17,17 +15,22 @@ def main():
         path_umidita="data/valori_umidita.json",
     )
 
-    while True:
+    def run():
 
         menu.mostra_menu()
         scelta = menu.scegli_opzione()
+
+        gestisci_scelta(scelta, menu, serra_service, run)
+
+    def gestisci_scelta(scelta, menu, serra_service, run):
 
         if scelta == "1":
 
             utente = menu.accesso()
 
             if utente is None:
-                continue
+                run()
+                return
 
             ruolo = utente.ruolo.strip().lower()
 
@@ -37,13 +40,23 @@ def main():
             elif ruolo == "operatore":
                 start_menu_operatore(menu.auth, serra_service)
 
+            run()
+            return
+
         elif scelta == "2":
             menu.registrazione()
+            run()
+            return
 
         elif scelta == "3":
             print("Uscita...")
-            time.sleep(3)
-            break
+            return
+
+        else:
+            print("Scelta non valida")
+            run()
+
+    run()
 
 
 if __name__ == "__main__":
