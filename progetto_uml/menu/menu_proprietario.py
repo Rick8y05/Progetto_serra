@@ -3,6 +3,7 @@ import json
 
 def start_menu_proprietario(auth, serra_service):
 
+    # menu proprietario
     while True:
         print("\n=== MENU PROPRIETARIO ===")
         print("1 - Visualizza utenti")
@@ -14,18 +15,14 @@ def start_menu_proprietario(auth, serra_service):
 
         scelta = input("> ").strip()
 
-        # --------------------
-        # 1 - UTENTI
-        # --------------------
+        # opzione 1 (visualizzazione utenti registrati)
         if scelta == "1":
             utenti = auth.get_utenti()
 
             for email, dati in utenti.items():
                 print(f"{email} ({dati['ruolo']})")
 
-        # --------------------
-        # 2 - MODALITÀ
-        # --------------------
+        # opzione 2 (selezione modalità automatica o manuale)
         elif scelta == "2":
             print("\n1 - Automatica")
             print("2 - Manuale")
@@ -38,9 +35,7 @@ def start_menu_proprietario(auth, serra_service):
 
             print(f"Modalità impostata: {modalita}")
 
-        # --------------------
-        # 3 - DISPOSITIVI
-        # --------------------
+        # opzione 3 (attivazione/disattivazione ventole, irrigazione e lampade UV)
         elif scelta == "3":
             print("\n--- CONTROLLO MANUALE ---")
             print("1 - Ventole")
@@ -62,9 +57,7 @@ def start_menu_proprietario(auth, serra_service):
 
             serra_service.azione_manuale(codice, dispositivo, stato)
 
-        # --------------------
-        # 4 - COLTURA
-        # --------------------
+        # opzione 4 (configurazione colture)
         elif scelta == "4":
             coltura = input("Nome coltura: ").strip().lower()
 
@@ -83,9 +76,7 @@ def start_menu_proprietario(auth, serra_service):
             serra_service.configura_coltura(codice, coltura)
             print("Coltura configurata!")
 
-        # --------------------
-        # 5 - PLANCIA
-        # --------------------
+        # opzione 5 (dati plancia)
         elif scelta == "5":
             print("\n--- PLANCIA ---")
 
@@ -101,9 +92,7 @@ def start_menu_proprietario(auth, serra_service):
                 print(f"Umidità: {info.get('umidita')}")
                 print(f"Modalità: {info.get('modalita')}")
 
-        # --------------------
-        # 6 - LOGOUT
-        # --------------------
+        # opzione 6 (logout)
         elif scelta == "6":
             print("Logout...")
             time.sleep(1)
