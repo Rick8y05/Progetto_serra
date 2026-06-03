@@ -1,6 +1,7 @@
 from models.sensore import Sensori
 from models.attuatori import Attuatori
 
+# definizione classe serra
 class Serra:
     def __init__(
         self,
@@ -33,6 +34,7 @@ class Serra:
         self.irrigazione = False
         self.lampada_uv = False
 
+    # definizione modalità automatica
     def mod_automatica(self):
         self.temperatura_serra = self.T1.get_dati()
         self.umidita_serra = self.U1.get_dati()
@@ -61,6 +63,7 @@ class Serra:
             self.sistema_irrigazione_attuatore.spegni()
             self.irrigazione = False
 
+    # definizione modalità manuale ventole
     def mod_manuale_ventole(self, stato: bool):
         if stato:
             self.ventole_attuatore.accendi()
@@ -68,6 +71,7 @@ class Serra:
             self.ventole_attuatore.spegni()
         self.ventole = bool(stato)
 
+    # definizione modalità manuale lampada UV
     def mod_manuale_lampada_uv(self, stato: bool):
         if stato:
             self.lampada_uv_attuatore.accendi()
@@ -75,6 +79,7 @@ class Serra:
             self.lampada_uv_attuatore.spegni()
         self.lampada_uv = bool(stato)
 
+    #definizione modalità manuale del sistema di irrigazione
     def mod_manuale_sistema_irrigazione(self, stato: bool):
         if stato:
             self.sistema_irrigazione_attuatore.accendi()
@@ -125,7 +130,7 @@ class Serra:
 
 
 
-#postilla le serre accedono a tutte le coture dunque non bisogna mandargli direttamente i dati basta mandargli
+# postilla le serre accedono a tutte le coture dunque non bisogna mandargli direttamente i dati basta mandargli
 # il nome della pianta, dunque il flow è gestore colture trova se ce quella pianta, manda a gestore serre
 #che punta a quella precisa serra e gli ivia
 #sentire al prof per quanto riguarda il fatto della repository dentro ogni serra
