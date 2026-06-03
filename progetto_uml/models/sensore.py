@@ -1,11 +1,15 @@
 from repository.lettore_dati import DatiRepository#cosi il codice viene più pulito
 #rispetto a fare quando richiami il metodo lettore_dati.DatiRepository().get_dati
 class Sensori:
-    def __init__(self,tipo: str, dati):
+    def __init__(self,tipo: str, path):
         #init è il costruttore serve per costruire l'oggetto della classe
         #self invece è la colla che attaccca i dati inviati all oggetto appena creato
         self.tipo = tipo
-        self.dati = dati
+        self.path = path
+        if isinstance(self.path, (list, tuple)):
+            self.dati = list(self.path)
+        else:
+            self.dati = DatiRepository(self.path, list).get_dati
         self.indice_corrente = 0 #indice per stampare un valore diverso ogni chiamata
     #def nuovo_valore(self):
 #il self dentro serve per dire che la funziona parla del sensre stesso
@@ -21,6 +25,3 @@ class Sensori:
     @property
     def get_tipo (self) -> str:
         return self.tipo
-
-
-
