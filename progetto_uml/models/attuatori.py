@@ -1,3 +1,4 @@
+# definizione classe Attuatori
 class Attuatori:
     def __init__(self,tipo: str, stato: bool):
         self.tipo = tipo
