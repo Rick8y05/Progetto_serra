@@ -1,8 +1,6 @@
 class GestoreColture:
-    """
-    Gestore della configurazione dei parametri delle colture.
-    Gestisce i dati delle colture e dei parametri specifici di ogni coltura.
-    """
+    # Gestore della configurazione dei parametri delle colture.
+    # Gestisce i dati delle colture e dei parametri specifici di ogni coltura.
 
     def __init__(self, dati_colture_source, dati_colture_utente_source):
         self.dati_colture_source = dati_colture_source
