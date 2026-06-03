@@ -1,3 +1,4 @@
+# definizione classe Utente (nome, email, password, ruolo assegnato)
 class Utente:
     def __init__(self, nome, email, password, ruolo):
         self.nome = nome.strip()
