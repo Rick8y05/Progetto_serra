@@ -41,7 +41,7 @@ class Menu:
         email = input("Email: ").strip()
         password = input("Password (min 6): ").strip()
 
-    # ---------------- PASSWORD ----------------
+    # controllo lunghezza minima password e presenza di almeno un carattere speciale
         if len(password) < 6:
             print("Password troppo corta")
             return
@@ -56,7 +56,7 @@ class Menu:
             print("La password deve contenere almeno un carattere speciale!")
             return
 
-    # ---------------- EMAIL ----------------
+    # controllo email valida con domini
         if "@" not in email:
             print("Email non valida!")
             return
@@ -73,7 +73,7 @@ class Menu:
             print("Email non valida!")
             return
 
-    # ---------------- REGISTRAZIONE ----------------
+    # registrazione nuovo proprietario
         if self.auth.register_proprietario(nome, email, password):
             print("Registrazione OK")
         else:
