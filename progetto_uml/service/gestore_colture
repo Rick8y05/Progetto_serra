@@ -1,5 +1,39 @@
+class GestoreColture:
+    """
+    Gestore della configurazione dei parametri delle colture.
+    Gestisce i dati delle colture e dei parametri specifici di ogni coltura.
+    """
 
-from models.serra import Serra
+    def __init__(self, dati_colture_source, dati_colture_utente_source):
+        self.dati_colture_source = dati_colture_source
+        self.dati_colture_utente_source = dati_colture_utente_source
+        self.dati_colture_utente = {}
+
+    def _leggi_dati(self, source):
+        if callable(source):
+            return source()
+        return source or {}
+
+    def configurazione_parametri_coltura(self, nome_coltura):
+        dati = self._leggi_dati(self.dati_colture_source)
+        nome_coltura = str(nome_coltura).lower().strip()
+        return dati.get(nome_coltura, {
+            "temperatura": 20,
+            "umidita": 50
+        })
+
+    def get_tutte_colture(self):
+        dati = self._leggi_dati(self.dati_colture_source)
+        return list(dati.keys())
+
+    def aggiungi_coltura_utente(self, nome_coltura, parametri):
+        self.dati_colture_utente[nome_coltura] = parametri
+        return True
+
+    def get_dati_colture_utente(self):
+        return self.dati_colture_utente
+
+
 class GestoreSerra:
     def __init__ (self,dati_serra: dict, dati_temperature, dati_umidita, gestore_colture): #ricordati che è listanza del gestore colture nel main se non funziona devi toglierla
         self.dati_temperatura = dati_temperature
@@ -51,10 +85,13 @@ class GestoreSerra:
             if self.serre_attive[n_univoco].proprietario== proprietario:
                 self.serre_attive[n_univoco].proprietario = "nessuno"
                 print("serra eliminata correttamente")
+                return True, "Serra rimossa correttamente"
             else:
                 print("questa serra apparrtiene ad un altro proprietario")
+                return False, "Questa serra appartiene ad un altro proprietario"
         else:
             print("numero univoco inesistente")
+            return False, "Numero univoco inesistente"
     def selezione_modalita(self,n_univoco,modalita):
         modalita_pulita = modalita.lower()
         if modalita_pulita=="automatico":
