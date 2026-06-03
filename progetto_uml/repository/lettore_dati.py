@@ -21,5 +21,3 @@ class DatiRepository:
     def get_dati(self):
         self.dati = self.read() #manda i dati salvati indietro
         return self.dati
-
-
