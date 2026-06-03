@@ -22,6 +22,7 @@ class DatiRepository:
         self.dati = self.read() #manda i dati salvati indietro
         return self.dati
 
+    # salvataggio dati nel file json
     def save(self, dati):
         try:
             with open(self.path, "w", encoding="utf-8") as file:
