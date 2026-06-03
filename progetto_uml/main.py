@@ -1,20 +1,43 @@
 from menu.menu import Menu
 from menu.menu_proprietario import start_menu_proprietario
 from menu.menu_operatore import start_menu_operatore
-from services.serra_services import SerraService
+from services.serra_services import GestoreSerra
+
+from repository.lettore_dati import DatiRepository
+from services.gestore_colture import GestoreColture
 import time
+
 
 def main():
 
     menu = Menu()
 
-    serra_service = SerraService(
-        path_serre="data/catalogo_serre.json",
-        path_colture="data/colture.json",
-        path_temperature="data/valori_temperature.json",
-        path_umidita="data/valori_umidita.json",
+    # ---------------- PATH ----------------
+    path_serre = "data/catalogo_serre.json"
+    path_colture = "data/colture.json"
+    path_temp = "data/valori_temperature.json"
+    path_umidita = "data/valori_umidita.json"
+
+    # ---------------- REPOSITORY ----------------
+    repo_serre = DatiRepository(path_serre)
+    repo_colture = DatiRepository(path_colture)
+    repo_temp = DatiRepository(path_temp)
+    repo_umidita = DatiRepository(path_umidita)
+
+    # ---------------- SERVIZI ----------------
+    gestore_colture = GestoreColture(
+        repo_colture.get_dati,
+        repo_colture.get_dati
     )
 
+    serra_service = GestoreSerra(
+        repo_serre.get_dati,
+        repo_temp.get_dati,
+        repo_umidita.get_dati,
+        gestore_colture
+    )
+
+    # ---------------- LOGICA MENU ----------------
     def run():
 
         menu.mostra_menu()
