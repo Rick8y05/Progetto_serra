@@ -1,9 +1,11 @@
 class Utente:
-    def __init__(self, email, password, ruolo):
+    def __init__(self, nome, email, password, ruolo):
+        self.nome = nome.strip()
         self.email = email.strip()
         self.password = password.strip()
         self.ruolo = ruolo.strip().lower()
-        
+
     # rappresentazione utile per debug
     def __str__(self):
-        return f"Utente(email={self.email}, ruolo={self.ruolo})"
+        return f"Utente(nome={self.nome}, email={self.email}, ruolo={self.ruolo})"
+
