@@ -1,5 +1,7 @@
 import threading
 import time
+
+# classe che gestisce la simulazione del tempo nel sistema esegue aggiornamenti periodici su sensori e serre tramite un thread separato
 class GestoreTempo:
     def __init__(self, gestore_serra, intervallo: float):
         self.gestore_serra = gestore_serra
