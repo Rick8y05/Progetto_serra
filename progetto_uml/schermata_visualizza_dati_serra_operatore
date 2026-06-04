@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFrame
 from PyQt6.QtCore import Qt, QTimer
 
-
+# visualizzazione dati delle serre gestite dall'operatore
 class VisualizzaDatiSerraOperatore(QWidget):
     def __init__(self, proiettore_pagine, gestore_serra, gestore_colture):
         super().__init__()
@@ -9,13 +9,11 @@ class VisualizzaDatiSerraOperatore(QWidget):
         self.gestore_serra = gestore_serra
         self.gestore_colture = gestore_colture
 
-        # Inizializziamo a vuoto per evitare il crash AttributeError all'avvio
         self.operatore = ""
 
         self.contenitore_dashboard = None
         self.serra_corrente_attiva = None
 
-        # INSTANZIAMO IL TIMER UNA SOLA VOLTA QUI: Evita accumulo di memoria e crash C++
         self.timer_aggiornamento = QTimer(self)
         self.timer_aggiornamento.timeout.connect(self.aggiorna_dati_in_tempo_reale)
 
@@ -47,14 +45,14 @@ class VisualizzaDatiSerraOperatore(QWidget):
         self.layout_card.setContentsMargins(50, 50, 50, 50)
         self.layout_card.setSpacing(20)
 
-        # Titolo
+        # titolo
         self.titolo = QLabel("VISUALIZZA STATO SERRA")
         self.titolo.setStyleSheet(
             "font-size: 36px; font-weight: 700; color: #FFFFFF; border: none; background: transparent;")
         self.titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout_card.addWidget(self.titolo)
 
-        # Sottotitolo
+        # sottotitolo
         self.sottotitolo = QLabel("Inserisci il codice identificativo per accedere ai dati real-time.")
         self.sottotitolo.setStyleSheet(
             "font-size: 18px; color: rgba(255, 255, 255, 0.5); border: none; background: transparent;")
@@ -66,13 +64,13 @@ class VisualizzaDatiSerraOperatore(QWidget):
         self.layout_contenuto_dinamico = QHBoxLayout()
         self.layout_card.addLayout(self.layout_contenuto_dinamico)
 
-        # Area messaggi
+        # messaggi
         self.label_messaggio = QLabel("")
         self.label_messaggio.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_messaggio.setStyleSheet("font-size: 14px; font-weight: 500; border: none; background: transparent;")
         self.layout_card.addWidget(self.label_messaggio)
 
-        # Bottone annulla
+        # bottone annulla e torna al menu
         self.btn_annulla = QPushButton("Annulla e torna al Menù")
         self.btn_annulla.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_annulla.setStyleSheet("""
@@ -89,23 +87,18 @@ class VisualizzaDatiSerraOperatore(QWidget):
         self.setLayout(layout_principale)
 
     def showEvent(self, event):
-        """Si attiva automaticamente ogni volta che la pagina compare sullo schermo"""
         super().showEvent(event)
 
-        # Controllo di sicurezza e recupero dinamico dell'utente corrente dallo stack delle pagine
         if hasattr(self.proiettore_pagine, 'utente_corrente') and self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
             self.operatore = utente.nome if hasattr(utente, 'nome') else utente[0]
 
-        # Resetta i residui di vecchi messaggi d'errore o input precedenti
         if hasattr(self, 'label_messaggio') and self.label_messaggio:
             self.label_messaggio.setText("")
 
-        # Avvia la schermata ripristinando il form di input iniziale
         self.ripristina_schermata_iniziale()
 
     def hideEvent(self, event):
-        """Si attiva quando la pagina viene nascosta per evitare spreco di CPU del timer"""
         super().hideEvent(event)
         if hasattr(self, 'timer_aggiornamento') and self.timer_aggiornamento.isActive():
             self.timer_aggiornamento.stop()
@@ -133,6 +126,7 @@ class VisualizzaDatiSerraOperatore(QWidget):
         """)
         layout_input_interno.addWidget(self.input_codice)
 
+        # bottone per accesso al monitoraggio
         btn_conferma = QPushButton("Accedi al Monitoraggio")
         btn_conferma.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_conferma.setStyleSheet("""
@@ -169,14 +163,14 @@ class VisualizzaDatiSerraOperatore(QWidget):
         self.svuota_layout_dinamico()
         self.serra_corrente_attiva = n_univoco
 
-        self.sottotitolo.setText(f"Monitoraggio in tempo reale • SERRA {n_univoco}")
+        self.sottotitolo.setText(f"Monitoraggio in tempo reale - SERRA {n_univoco}")
 
         self.contenitore_dashboard = QWidget()
         dashboard_layout = QVBoxLayout(self.contenitore_dashboard)
         dashboard_layout.setSpacing(15)
         dashboard_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Sensori
+        # sensori
         layout_sensori = QHBoxLayout()
         layout_sensori.setSpacing(15)
 
@@ -210,7 +204,7 @@ class VisualizzaDatiSerraOperatore(QWidget):
         layout_sensori.addWidget(card_umd)
         dashboard_layout.addLayout(layout_sensori)
 
-        # Attuatori
+        # attuatori
         card_attuatori = QFrame()
         card_attuatori.setStyleSheet(
             "background-color: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px;")
@@ -252,7 +246,6 @@ class VisualizzaDatiSerraOperatore(QWidget):
 
         self.layout_contenuto_dinamico.addWidget(self.contenitore_dashboard)
 
-        # Gestione del timer sicura al 100%: stop e start senza distruzione dell'oggetto
         if self.timer_aggiornamento.isActive():
             self.timer_aggiornamento.stop()
 
@@ -290,10 +283,10 @@ class VisualizzaDatiSerraOperatore(QWidget):
             print(f"Errore real-time operatore: {e}")
 
     def ripristina_schermata_iniziale(self):
-        # Fermiamo il timer in sicurezza senza rimuoverlo dalla memoria della classe
         if hasattr(self, 'timer_aggiornamento') and self.timer_aggiornamento is not None:
             self.timer_aggiornamento.stop()
 
+        # inserimento del codice identificativo per accedere ai dati in tempo reale
         self.serra_corrente_attiva = None
         self.sottotitolo.setText("Inserisci il codice identificativo per accedere ai dati real-time.")
         self.mostra_form_input()
@@ -304,7 +297,6 @@ class VisualizzaDatiSerraOperatore(QWidget):
                 item = self.layout_contenuto_dinamico.takeAt(0)
                 widget = item.widget()
                 if widget is not None:
-                    # Rimuove l'associazione grafica prima di cancellarlo definitivamente
                     widget.hide()
                     widget.setParent(None)
                     widget.deleteLater()
