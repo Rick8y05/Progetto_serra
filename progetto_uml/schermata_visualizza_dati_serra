@@ -1,0 +1,354 @@
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame
+from PyQt6.QtCore import Qt, QTimer
+
+
+class VisualizzaDatiSerra(QWidget):
+    def __init__(self, proiettore_pagine, gestore_serra, gestore_colture):
+        super().__init__()
+        self.proiettore_pagine = proiettore_pagine
+        self.gestore_serra = gestore_serra
+        self.gestore_colture = gestore_colture
+        self.proprietario = ""
+        self.contenitore_dashboard = None
+        self.timer_aggiornamento = None
+        self.serra_corrente_attiva = None
+        self.inizializza_interfaccia()
+
+    def inizializza_interfaccia(self):
+        # Stile interfaccia trasparente
+        self.setStyleSheet("""
+            QWidget {
+                background-color: transparent;
+                font-family: '.AppleSystemUIFont', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+                color: #FFFFFF;
+            }
+        """)
+
+        # Creazione layout principale
+        layout_principale = QVBoxLayout()
+        layout_principale.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        card_centrale = QFrame()
+        card_centrale.setFixedWidth(850)
+        card_centrale.setStyleSheet("""
+            QFrame {
+                background-color: rgba(255, 255, 255, 0.04);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 24px;
+            }
+        """)
+
+        # Creazione card centrale
+        self.layout_card = QVBoxLayout(card_centrale)
+        self.layout_card.setContentsMargins(50, 50, 50, 50)
+        self.layout_card.setSpacing(20)
+
+        # Titolo
+        titolo = QLabel("VISUALIZZA DATI SERRA")
+        titolo.setStyleSheet("""
+            QLabel {
+                font-size: 36px; 
+                font-weight: 700; 
+                letter-spacing: -0.5px;
+                color: #FFFFFF;
+                border: none;
+                background: transparent;
+            }
+        """)
+        titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.layout_card.addWidget(titolo)
+
+        # Sotto titolo
+        self.sottotitolo = QLabel("Seleziona la serra che desideri visualizzare")
+        self.sottotitolo.setStyleSheet(
+            "font-size: 18px; color: rgba(255, 255, 255, 0.5); border: none; background: transparent;")
+        self.sottotitolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.layout_card.addWidget(self.sottotitolo)
+
+        self.layout_card.addSpacing(10)
+
+        # Box bottoni orizzontale
+        self.layout_bottoni_serre = QHBoxLayout()
+        self.layout_bottoni_serre.setSpacing(15)
+        self.layout_card.addLayout(self.layout_bottoni_serre)
+
+        # Area messaggi
+        self.label_messaggio = QLabel("")
+        self.label_messaggio.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_messaggio.setStyleSheet("font-size: 14px; font-weight: 500; border: none; background: transparent;")
+        self.layout_card.addWidget(self.label_messaggio)
+        self.layout_card.addSpacing(10)
+
+        # Bottone annulla
+        btn_annulla = QPushButton("Annulla e torna al Menù")
+        btn_annulla.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_annulla.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 12px;
+                padding: 12px 24px;
+                font-size: 14px;
+                font-weight: 600;
+                color: rgba(255, 255, 255, 0.7);
+            }
+            QPushButton:hover { background-color: rgba(255, 255, 255, 0.1); color: #FFFFFF; }
+        """)
+        btn_annulla.clicked.connect(self.torna_al_menu)
+        self.layout_card.addWidget(btn_annulla, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        layout_principale.addWidget(card_centrale)
+        self.setLayout(layout_principale)
+
+    # --- RISOLUZIONE METODI DI EVENTO PER AGGIORNAMENTO DINAMICO ---
+    def showEvent(self, event):
+        """Si attiva automaticamente ogni volta che la pagina compare sullo schermo"""
+        super().showEvent(event)
+
+        # 1. Controllo di sicurezza: recupera in modo sicuro l'utente loggato nello stack delle pagine
+        if self.proiettore_pagine.utente_corrente is not None:
+            utente = self.proiettore_pagine.utente_corrente
+            self.proprietario = utente.nome if hasattr(utente, 'nome') else utente[0]
+
+        # 2. Resetta l'interfaccia eliminando eventuali timer attivi o vecchie dashboard e ricarica i pulsanti aggiornati
+        if hasattr(self, 'label_messaggio') and self.label_messaggio:
+            self.label_messaggio.setText("")
+
+        self.ripristina_schermata_selezione()
+
+    def hideEvent(self, event):
+        """Si attiva quando la pagina viene nascosta per evitare spreco di CPU del timer in background"""
+        super().hideEvent(event)
+        if self.timer_aggiornamento is not None and self.timer_aggiornamento.isActive():
+            self.timer_aggiornamento.stop()
+
+    def aggiorna_pulsanti_serre(self):
+        self.svuota_layout_bottoni()
+        n_univoci_proprietario = self.gestore_serra.parco_serre_proprietario(self.proprietario)
+
+        if not n_univoci_proprietario:
+            label_vuota = QLabel("Non hai nessuna serra registrata nel tuo profilo.")
+            label_vuota.setStyleSheet(
+                "font-size: 14px; color: rgba(255, 255, 255, 0.4); font-style: italic; border: none; background: transparent;")
+            self.layout_bottoni_serre.addWidget(label_vuota, alignment=Qt.AlignmentFlag.AlignCenter)
+            return
+
+        self.layout_bottoni_serre.addStretch(1)
+
+        for n_univoco in n_univoci_proprietario:
+            btn_serra = QPushButton(f"SERRA \n{n_univoco}")
+            btn_serra.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn_serra.setFixedSize(140, 90)
+            btn_serra.setStyleSheet("""
+                QPushButton {
+                    background-color: rgba(255, 255, 255, 0.06);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 16px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #FFFFFF;
+                }
+                QPushButton:hover {
+                    background-color: rgba(30, 136, 229, 0.15);
+                    border-color: #1E88E5;
+                }
+            """)
+            btn_serra.clicked.connect(lambda checked, id_scelto=n_univoco: self.schermata_visualizzazione(id_scelto))
+            self.layout_bottoni_serre.addWidget(btn_serra)
+
+        self.layout_bottoni_serre.addStretch(1)
+
+    def schermata_visualizzazione(self, n_univoco):
+        self.svuota_layout_bottoni()
+        self.serra_corrente_attiva = n_univoco
+
+        self.sottotitolo.setText(f"Monitoraggio in tempo reale • SERRA {n_univoco}")
+
+        self.contenitore_dashboard = QWidget()
+        self.contenitore_dashboard.setStyleSheet("background: transparent; border: none;")
+        dashboard_layout = QVBoxLayout(self.contenitore_dashboard)
+        dashboard_layout.setSpacing(15)
+        dashboard_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Sensori
+        layout_sensori = QHBoxLayout()
+        layout_sensori.setSpacing(15)
+
+        card_temp = QFrame()
+        card_temp.setStyleSheet(
+            "background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px;")
+        lyt_temp = QVBoxLayout(card_temp)
+        lbl_temp_titolo = QLabel("TEMPERATURA")
+        lbl_temp_titolo.setStyleSheet(
+            "font-size: 12px; color: rgba(255, 255, 255, 0.5); font-weight: 600; border: none;")
+        self.lbl_temp_valore = QLabel("-- °C")
+        self.lbl_temp_valore.setStyleSheet("font-size: 28px; color: #FF7043; font-weight: 700; border: none;")
+        self.lbl_temp_valore.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lyt_temp.addWidget(lbl_temp_titolo)
+        lyt_temp.addWidget(self.lbl_temp_valore)
+
+        card_umd = QFrame()
+        card_umd.setStyleSheet(
+            "background-color: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px;")
+        lyt_umd = QVBoxLayout(card_umd)
+
+        lbl_umd_titolo = QLabel("UMIDITÀ TERRENO")
+        lbl_umd_titolo.setStyleSheet(
+            "font-size: 12px; color: rgba(255, 255, 255, 0.5); font-weight: 600; border: none;")
+        self.lbl_umd_valore = QLabel("-- %")
+        self.lbl_umd_valore.setStyleSheet("font-size: 28px; color: #42A5F5; font-weight: 700; border: none;")
+        self.lbl_umd_valore.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lyt_umd.addWidget(lbl_umd_titolo)
+        lyt_umd.addWidget(self.lbl_umd_valore)
+
+        layout_sensori.addWidget(card_temp)
+        layout_sensori.addWidget(card_umd)
+        dashboard_layout.addLayout(layout_sensori)
+
+        # Attuatori
+        card_attuatori = QFrame()
+        card_attuatori.setStyleSheet(
+            "background-color: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px;")
+        lyt_attuatori = QVBoxLayout(card_attuatori)
+        lyt_attuatori.setContentsMargins(15, 15, 15, 15)
+
+        self.lbl_stato_modalita = QLabel("--")
+        self.lbl_stato_ventole = QLabel("--")
+        self.lbl_stato_irrigazione = QLabel("--")
+        self.lbl_stato_uv = QLabel("--")
+
+        def aggiungi_riga_attuatore(nome_componente, lbl_stato):
+            riga = QHBoxLayout()
+            lbl_nome = QLabel(nome_componente)
+            lbl_nome.setStyleSheet("font-size: 14px; font-weight: 500; border: none;")
+            lbl_stato.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            riga.addWidget(lbl_nome)
+            riga.addStretch()
+            riga.addWidget(lbl_stato)
+            lyt_attuatori.addLayout(riga)
+
+        aggiungi_riga_attuatore("Modalità di Controllo:", self.lbl_stato_modalita)
+        aggiungi_riga_attuatore("Ventole di Ricircolo:", self.lbl_stato_ventole)
+        aggiungi_riga_attuatore("Impianto di Irrigazione:", self.lbl_stato_irrigazione)
+        aggiungi_riga_attuatore("Lampade UV stimolanti:", self.lbl_stato_uv)
+
+        dashboard_layout.addWidget(card_attuatori)
+
+        btn_cambia_serra = QPushButton("↩ Seleziona un'altra Serra")
+        btn_cambia_serra.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_cambia_serra.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(30, 136, 229, 0.1);
+                border: 1px solid rgba(30, 136, 229, 0.3);
+                border-radius: 12px;
+                padding: 10px 20px;
+                font-size: 13px;
+                font-weight: 600;
+                color: #42A5F5;
+            }
+            QPushButton:hover { background-color: rgba(30, 136, 229, 0.2); color: #FFFFFF; }
+        """)
+        btn_cambia_serra.clicked.connect(self.ripristina_schermata_selezione)
+        dashboard_layout.addWidget(btn_cambia_serra, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        self.layout_bottoni_serre.addWidget(self.contenitore_dashboard)
+
+        # CORRETTO: Arresto di sicurezza di un eventuale timer residuo prima di istanziarne uno nuovo
+        if self.timer_aggiornamento is not None:
+            self.timer_aggiornamento.stop()
+            self.timer_aggiornamento.deleteLater()
+
+        # Avvio Real-Time pulito
+        self.aggiorna_dati_in_tempo_reale()
+        self.timer_aggiornamento = QTimer(self)
+        self.timer_aggiornamento.timeout.connect(self.aggiorna_dati_in_tempo_reale)
+        self.timer_aggiornamento.start(1000)
+
+    def aggiorna_dati_in_tempo_reale(self):
+        try:
+            dati_serra = self.gestore_serra.visualizza_stato_serre(self.serra_corrente_attiva)
+            if not dati_serra:
+                return
+
+            umidita = dati_serra[0]
+            temperatura = dati_serra[1]
+            stato_ventole = dati_serra[2]
+            stato_impianto_irrigazione = dati_serra[3]
+            stato_lampaUV = dati_serra[4]
+            modalita = dati_serra[5]
+
+            self.lbl_temp_valore.setText(f"{temperatura} °C")
+            self.lbl_umd_valore.setText(f"{umidita} %")
+
+            if str(modalita).lower() in ['auto', 'automatica', 'automatico', 'true', '1']:
+                self.lbl_stato_modalita.setText("AUTOMATICA")
+                self.lbl_stato_modalita.setStyleSheet(
+                    "font-size: 13px; font-weight: 700; color: #66BB6A; background-color: rgba(102, 187, 106, 0.1); border: 1px solid rgba(102, 187, 106, 0.2); padding: 4px 10px; border-radius: 8px;")
+            else:
+                self.lbl_stato_modalita.setText("MANUALE")
+                self.lbl_stato_modalita.setStyleSheet(
+                    "font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.4); background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 8px;")
+
+            if stato_ventole is True or str(stato_ventole).lower() in ['true', '1', 'on', 'attivo']:
+                self.lbl_stato_ventole.setText("ATTIVO")
+                self.lbl_stato_ventole.setStyleSheet(
+                    "font-size: 13px; font-weight: 700; color: #66BB6A; background-color: rgba(102, 187, 106, 0.1); border: 1px solid rgba(102, 187, 106, 0.2); padding: 4px 10px; border-radius: 8px;")
+            else:
+                self.lbl_stato_ventole.setText("SPENTO")
+                self.lbl_stato_ventole.setStyleSheet(
+                    "font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.4); background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 8px;")
+
+            if stato_impianto_irrigazione is True or str(stato_impianto_irrigazione).lower() in ['true', '1', 'on',
+                                                                                                 'attivo']:
+                self.lbl_stato_irrigazione.setText("ATTIVO")
+                self.lbl_stato_irrigazione.setStyleSheet(
+                    "font-size: 13px; font-weight: 700; color: #66BB6A; background-color: rgba(102, 187, 106, 0.1); border: 1px solid rgba(102, 187, 106, 0.2); padding: 4px 10px; border-radius: 8px;")
+            else:
+                self.lbl_stato_irrigazione.setText("SPENTO")
+                self.lbl_stato_irrigazione.setStyleSheet(
+                    "font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.4); background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 8px;")
+
+            if stato_lampaUV is True or str(stato_lampaUV).lower() in ['true', '1', 'on', 'attivo']:
+                self.lbl_stato_uv.setText("ATTIVO")
+                self.lbl_stato_uv.setStyleSheet(
+                    "font-size: 13px; font-weight: 700; color: #66BB6A; background-color: rgba(102, 187, 106, 0.1); border: 1px solid rgba(102, 187, 106, 0.2); padding: 4px 10px; border-radius: 8px;")
+            else:
+                self.lbl_stato_uv.setText("SPENTO")
+                self.lbl_stato_uv.setStyleSheet(
+                    "font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.4); background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 8px;")
+
+        except Exception as e:
+            print(f"Errore aggiornamento dati grafico: {e}")
+
+    def ripristina_schermata_selezione(self):
+        if hasattr(self, 'timer_aggiornamento') and self.timer_aggiornamento is not None:
+            if self.timer_aggiornamento.isActive():
+                self.timer_aggiornamento.stop()
+            self.timer_aggiornamento.deleteLater()
+            self.timer_aggiornamento = None
+
+        if self.contenitore_dashboard is not None:
+            self.layout_bottoni_serre.removeWidget(self.contenitore_dashboard)
+            self.contenitore_dashboard.setParent(None)
+            self.contenitore_dashboard.deleteLater()
+            self.contenitore_dashboard = None
+
+        self.serra_corrente_attiva = None
+        self.sottotitolo.setText("Seleziona la serra che desideri visualizzare")
+        self.aggiorna_pulsanti_serre()
+
+    def svuota_layout_bottoni(self):
+        if self.layout_bottoni_serre is not None:
+            while self.layout_bottoni_serre.count():
+                item = self.layout_bottoni_serre.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.setParent(None)
+                    widget.deleteLater()
+                else:
+                    del item
+
+    def torna_al_menu(self):
+        self.label_messaggio.setText("")
+        self.ripristina_schermata_selezione()
+        self.proiettore_pagine.setCurrentIndex(0)
