@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame
 from PyQt6.QtCore import Qt
 
-
+# selezione della modalità di funzionamento
 class SelezionaModalitaFunzionamento(QWidget):
     def __init__(self, proiettore_pagine, gestore_serra, gestore_colture):
         super().__init__()
@@ -40,6 +40,7 @@ class SelezionaModalitaFunzionamento(QWidget):
         self.layout_card.setContentsMargins(50, 50, 50, 50)
         self.layout_card.setSpacing(20)
 
+        # titolo
         titolo = QLabel("MODALITÀ FUNZIONAMENTO")
         titolo.setStyleSheet("""
             QLabel {
@@ -54,6 +55,7 @@ class SelezionaModalitaFunzionamento(QWidget):
         titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout_card.addWidget(titolo)
 
+        # sottotitolo
         self.sottotitolo = QLabel("Seleziona la serra su cui desideri operare")
         self.sottotitolo.setStyleSheet(
             "font-size: 18px; color: rgba(255, 255, 255, 0.5); border: none; background: transparent;")
@@ -72,10 +74,11 @@ class SelezionaModalitaFunzionamento(QWidget):
         self.layout_card.addWidget(self.label_messaggio)
         self.layout_card.addSpacing(10)
 
-        # BARRA DEI BOTTONI IN BASSO (Annulla a sinistra, Salva a destra)
+        # bottoni in basso
         layout_comandi_bassi = QHBoxLayout()
         layout_comandi_bassi.setSpacing(15)
 
+        # bottone annulla e torna al menu
         self.btn_annulla = QPushButton("Annulla e torna al Menù")
         self.btn_annulla.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_annulla.setStyleSheet("""
@@ -92,6 +95,7 @@ class SelezionaModalitaFunzionamento(QWidget):
         """)
         self.btn_annulla.clicked.connect(self.torna_al_menu)
 
+        # bottone per salvare la modalità selezionata
         self.btn_salva = QPushButton("Salva Modalità")
         self.btn_salva.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_salva.setEnabled(False)  # Disabilitato finché non si seleziona una serra
@@ -124,9 +128,10 @@ class SelezionaModalitaFunzionamento(QWidget):
 
     def aggiorna_pulsanti_serre(self):
         self.svuota_layout_bottoni()
-        self.btn_salva.setEnabled(False)  # Sicurezza: spento nella lista serre
+        self.btn_salva.setEnabled(False)
         n_univoci_proprietario = self.gestore_serra.parco_serre_proprietario(self.proprietario)
 
+        # mancanza di serre registrate nel profilo
         if not n_univoci_proprietario:
             label_vuota = QLabel("Non hai nessuna serra registrata nel tuo profilo.")
             label_vuota.setStyleSheet(
@@ -160,15 +165,16 @@ class SelezionaModalitaFunzionamento(QWidget):
 
         self.layout_bottoni_serre.addStretch(1)
 
+    # selezione stato attuatori
     def schermata_seleziona_stato_attuatori(self, n_univoco):
         self.svuota_layout_bottoni()
         self.serra_corrente_attiva = n_univoco
-        self.btn_salva.setEnabled(True)  # Attiva il tasto di salvataggio in basso
+        self.btn_salva.setEnabled(True)
 
         if self.modalita_selezionata is None:
             self.modalita_selezionata = str(self.gestore_serra.get_modalita(n_univoco)).lower()
 
-        self.sottotitolo.setText(f"Imposta funzionamento • SERRA {n_univoco}")
+        self.sottotitolo.setText(f"Imposta funzionamento - SERRA {n_univoco}")
 
         self.contenitore_dashboard = QWidget()
         dashboard_layout = QVBoxLayout(self.contenitore_dashboard)
@@ -178,10 +184,12 @@ class SelezionaModalitaFunzionamento(QWidget):
         layout_scelta = QHBoxLayout()
         layout_scelta.setSpacing(20)
 
+        # bottone modalità manuale
         self.btn_manuale = QPushButton("MANUALE")
         self.btn_manuale.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_manuale.setFixedSize(180, 60)
 
+        # bottone modalità automatica
         self.btn_automatica = QPushButton("AUTOMATICA")
         self.btn_automatica.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_automatica.setFixedSize(180, 60)
@@ -198,7 +206,7 @@ class SelezionaModalitaFunzionamento(QWidget):
 
         dashboard_layout.addLayout(layout_scelta)
 
-        # Bottone intermedio per tornare indietro alle serre annullando le modifiche non salvate
+        # bottone intermedio per tornare indietro alle serre annullando le modifiche non salvate
         btn_indietro = QPushButton("Seleziona un'altra Serra")
         btn_indietro.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_indietro.setStyleSheet("""
@@ -251,7 +259,7 @@ class SelezionaModalitaFunzionamento(QWidget):
     def ripristina_schermata_selezione(self):
         self.modalita_selezionata = None
         self.serra_corrente_attiva = None
-        self.btn_salva.setEnabled(False)  # Disabilita il salvataggio quando si esce dalla dashboard serra
+        self.btn_salva.setEnabled(False)
 
         if self.contenitore_dashboard is not None:
             self.layout_bottoni_serre.removeWidget(self.contenitore_dashboard)
@@ -279,16 +287,13 @@ class SelezionaModalitaFunzionamento(QWidget):
         self.ripristina_schermata_selezione()
         self.proiettore_pagine.setCurrentIndex(0)
 
-    # RISOLUZIONE: Aggiorna l'utente corrente dello stack e rigenera lo stato iniziale dei bottoni
     def showEvent(self, event):
         super().showEvent(event)
 
-        # 1. Controllo di sicurezza sull'utente corrente dello stack
         if self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
             self.proprietario = utente.nome if hasattr(utente, 'nome') else utente[0]
 
-        # 2. Resetta l'interfaccia eliminando eventuali dashboard aperte e ricarica i pulsanti delle serre
         if hasattr(self, 'label_messaggio') and self.label_messaggio:
             self.label_messaggio.setText("")
 
