@@ -1,0 +1,337 @@
+import json
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFrame, QScrollArea, \
+    QGridLayout
+from PyQt6.QtCore import Qt, QTimer
+
+
+class AggiornaParametriColtureOperatore(QWidget):
+    def __init__(self, proiettore_pagine, gestore_serra, gestore_colture):
+        super().__init__()
+        self.proiettore_pagine = proiettore_pagine
+        self.gestore_serra = gestore_serra
+        self.gestore_colture = gestore_colture
+
+        self.operatore = ""
+        self.contenitore_dinamico_wgt = None
+        self.pianta_selezionata = None
+        self.inputs_parametri = {}
+
+        self.inizializza_interfaccia()
+
+    def inizializza_interfaccia(self):
+        self.setStyleSheet("""
+            QWidget {
+                background-color: transparent;
+                font-family: '.AppleSystemUIFont', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+                color: #FFFFFF;
+            }
+        """)
+
+        layout_principale = QVBoxLayout()
+        layout_principale.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        card_centrale = QFrame()
+        card_centrale.setFixedWidth(850)
+        card_centrale.setStyleSheet("""
+            QFrame {
+                background-color: rgba(255, 255, 255, 0.04);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 24px;
+            }
+        """)
+
+        self.layout_card = QVBoxLayout(card_centrale)
+        self.layout_card.setContentsMargins(50, 50, 50, 50)
+        self.layout_card.setSpacing(20)
+
+        # Titolo stile Rimuovi Serra
+        self.titolo = QLabel("AGGIORNAMENTO PARAMETRI CATALOGO")
+        self.titolo.setStyleSheet("""
+            QLabel {
+                font-size: 36px; 
+                font-weight: 700; 
+                letter-spacing: -0.5px;
+                color: #FFFFFF;
+                border: none;
+                background: transparent;
+            }
+        """)
+        self.titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.layout_card.addWidget(self.titolo)
+
+        self.sottotitolo = QLabel("Seleziona una coltura dal catalogo per modificarne i parametri ottimali.")
+        self.sottotitolo.setStyleSheet(
+            "font-size: 18px; color: rgba(255, 255, 255, 0.5); border: none; background: transparent;")
+        self.sottotitolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.layout_card.addWidget(self.sottotitolo)
+
+        self.layout_card.addSpacing(10)
+
+        # Contenitore dinamico
+        self.layout_contenuto_dinamico = QHBoxLayout()
+        self.layout_card.addLayout(self.layout_contenuto_dinamico)
+
+        self.label_messaggio = QLabel("")
+        self.label_messaggio.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_messaggio.setStyleSheet("font-size: 14px; font-weight: 500; border: none; background: transparent;")
+        self.layout_card.addWidget(self.label_messaggio)
+        self.layout_card.addSpacing(10)
+
+        self.btn_annulla = QPushButton("Annulla e torna al Menù Operatore")
+        self.btn_annulla.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_annulla.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 12px;
+                padding: 12px 24px;
+                font-size: 14px;
+                font-weight: 600;
+                color: rgba(255, 255, 255, 0.7);
+            }
+            QPushButton:hover { background-color: rgba(255, 255, 255, 0.1); color: #FFFFFF; }
+        """)
+        self.btn_annulla.clicked.connect(self.torna_al_menu_operatore)
+        self.layout_card.addWidget(self.btn_annulla, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        layout_principale.addWidget(card_centrale)
+        self.setLayout(layout_principale)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        if hasattr(self.proiettore_pagine, 'utente_corrente') and self.proiettore_pagine.utente_corrente is not None:
+            utente = self.proiettore_pagine.utente_corrente
+            self.operatore = utente.nome if hasattr(utente, 'nome') else utente[0]
+        self.ripristina_schermata_iniziale()
+
+    def estrai_dizionario_catalogo(self):
+        catalogo = self.gestore_colture.get_catalogo_aggiornato
+        if callable(catalogo):
+            return catalogo()
+        return catalogo
+
+    def mostra_griglia_colture(self):
+        self.svuota_layout_dinamico()
+
+        self.contenitore_dinamico_wgt = QWidget()
+        layout_orizzontale_centrato = QHBoxLayout(self.contenitore_dinamico_wgt)
+
+        layout_griglia = QGridLayout()
+        layout_griglia.setSpacing(15)
+
+        try:
+            catalogo = self.estrai_dizionario_catalogo()
+        except Exception:
+            catalogo = {}
+
+        if not catalogo:
+            try:
+                chiave_colture = self.gestore_colture.colture_disponibili()
+            except:
+                chiave_colture = ["basilico"]
+            catalogo = {c: {} for c in chiave_colture}
+
+        colonne = 4  # Modifica il numero di colonne per adattarle alla griglia
+        riga = 0
+        colonna = 0
+
+        for nome_coltura in catalogo.keys():
+            # Pulsanti con dimensioni fisse identici alla rimozione serra
+            btn_coltura = QPushButton(f"{nome_coltura.upper()}")
+            btn_coltura.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn_coltura.setFixedSize(140, 90)
+            btn_coltura.setStyleSheet("""
+                QPushButton {
+                    background-color: rgba(255, 255, 255, 0.06);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 16px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #FFFFFF;
+                }
+                QPushButton:hover {
+                    background-color: rgba(30, 136, 229, 0.15);
+                    border-color: #1E88E5;
+                }
+            """)
+            btn_coltura.clicked.connect(lambda checked, nome=nome_coltura: self.seleziona_coltura_e_apri_form(nome))
+
+            layout_griglia.addWidget(btn_coltura, riga, colonna)
+
+            colonna += 1
+            if colonna >= colonne:
+                colonna = 0
+                riga += 1
+
+        layout_orizzontale_centrato.addStretch()
+        layout_orizzontale_centrato.addLayout(layout_griglia)
+        layout_orizzontale_centrato.addStretch()
+
+        self.layout_contenuto_dinamico.addWidget(self.contenitore_dinamico_wgt)
+
+    def seleziona_coltura_e_apri_form(self, nome_coltura):
+        self.pianta_selezionata = nome_coltura
+        self.label_messaggio.setText("")
+        self.schermata_aggiornamento_parametri(nome_coltura)
+
+    def schermata_aggiornamento_parametri(self, nome_pianta):
+        self.svuota_layout_dinamico()
+        self.inputs_parametri.clear()
+
+        self.sottotitolo.setText(f"Modifica i parametri ottimali per: {nome_pianta.upper()}")
+
+        try:
+            catalogo = self.estrai_dizionario_catalogo()
+            parametri_coltura = catalogo.get(nome_pianta, {})
+        except Exception:
+            parametri_coltura = {}
+
+        if not parametri_coltura:
+            parametri_coltura = {
+                "temperatura_min": 18, "temperatura_max": 28,
+                "umidita_min": 50, "umidita_max": 80
+            }
+
+        self.contenitore_dinamico_wgt = QWidget()
+        layout_form = QVBoxLayout(self.contenitore_dinamico_wgt)
+        layout_form.setSpacing(12)
+
+        # Inserisco il form mantenendo il design della card
+        for chiave, valore in parametri_coltura.items():
+            riga_parametro = QFrame()
+            riga_parametro.setStyleSheet("""
+                QFrame {
+                    background-color: rgba(255, 255, 255, 0.02);
+                    border: 1px solid rgba(255, 255, 255, 0.05);
+                    border-radius: 12px;
+                }
+            """)
+            layout_riga = QHBoxLayout(riga_parametro)
+            layout_riga.setContentsMargins(20, 10, 20, 10)
+
+            label_nome_parametro = QLabel(f"{chiave.replace('_', ' ').upper()}:")
+            label_nome_parametro.setStyleSheet(
+                "font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.8); border:none;")
+
+            input_valore_parametro = QLineEdit()
+            input_valore_parametro.setText(str(valore))
+            input_valore_parametro.setFixedWidth(200)
+            input_valore_parametro.setStyleSheet("""
+                QLineEdit {
+                    background-color: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 8px; padding: 10px; color: #FFFFFF; font-size: 14px; font-weight: bold;
+                }
+                QLineEdit:focus { border: 1px solid #34C759; }
+            """)
+
+            layout_riga.addWidget(label_nome_parametro)
+            layout_riga.addStretch()
+            layout_riga.addWidget(input_valore_parametro)
+
+            layout_form.addWidget(riga_parametro)
+            self.inputs_parametri[chiave] = input_valore_parametro
+
+        layout_bottoni_azione = QHBoxLayout()
+        layout_bottoni_azione.setSpacing(15)
+
+        btn_indietro = QPushButton("↩ Torna alla lista")
+        btn_indietro.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_indietro.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px; padding: 12px 20px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.7);
+            }
+            QPushButton:hover { background-color: rgba(255, 255, 255, 0.1); color: #FFFFFF; }
+        """)
+        btn_indietro.clicked.connect(self.ripristina_schermata_iniziale)
+
+        btn_salva = QPushButton("Salva Nuovi Parametri")
+        btn_salva.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_salva.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #34C759, stop:1 #28A745); 
+                border: none; border-radius: 12px; padding: 12px 30px; font-size: 14px; font-weight: 600; color: #FFFFFF;
+            }
+            QPushButton:hover { background: #4CD964; }
+        """)
+        btn_salva.clicked.connect(self.salva_modifiche_parametri)
+
+        layout_bottoni_azione.addWidget(btn_indietro)
+        layout_bottoni_azione.addStretch()
+        layout_bottoni_azione.addWidget(btn_salva)
+
+        layout_form.addSpacing(10)
+        layout_form.addLayout(layout_bottoni_azione)
+
+        self.layout_contenuto_dinamico.addWidget(self.contenitore_dinamico_wgt)
+
+    def salva_modifiche_parametri(self):
+        if not self.pianta_selezionata:
+            return
+
+        dati_da_salvare = {}
+        try:
+            for tipo_parametro, campo_input in self.inputs_parametri.items():
+                valore_testo = campo_input.text().strip()
+                if "." in valore_testo:
+                    try:
+                        nuovo_valore = float(valore_testo)
+                    except ValueError:
+                        nuovo_valore = valore_testo
+                else:
+                    try:
+                        nuovo_valore = int(valore_testo)
+                    except ValueError:
+                        nuovo_valore = valore_testo
+                dati_da_salvare[tipo_parametro] = nuovo_valore
+
+            catalogo_ram = self.estrai_dizionario_catalogo()
+            if self.pianta_selezionata not in catalogo_ram:
+                catalogo_ram[self.pianta_selezionata] = {}
+
+            for tipo_parametro, nuovo_dato in dati_da_salvare.items():
+                self.gestore_colture.aggiornamento_parametri_catalogo(
+                    pianta=self.pianta_selezionata, tipo_parametro=tipo_parametro, nuovo_dato=nuovo_dato
+                )
+                catalogo_ram[self.pianta_selezionata][tipo_parametro] = nuovo_dato
+
+            try:
+                with open("data/colture.json", "w", encoding="utf-8") as f:
+                    json.dump(catalogo_ram, f, indent=4, ensure_ascii=False)
+                scrittura_ok = True
+            except:
+                scrittura_ok = False
+
+            if scrittura_ok:
+                self.label_messaggio.setStyleSheet("color: #34C759; font-weight: 600; font-size: 15px;")
+                self.label_messaggio.setText(f"✔ Parametri di '{self.pianta_selezionata.upper()}' salvati!")
+                self.sender().setEnabled(False)
+                QTimer.singleShot(2000, self.torna_al_menu_operatore)
+            else:
+                self.label_messaggio.setStyleSheet("color: #FF3B30; font-weight: 600;")
+                self.label_messaggio.setText("Errore: Impossibile scrivere le modifiche.")
+
+        except Exception as e:
+            self.label_messaggio.setStyleSheet("color: #FF3B30; font-weight: 600;")
+            self.label_messaggio.setText("Errore imprevisto.")
+
+    def ripristina_schermata_iniziale(self):
+        self.pianta_selezionata = None
+        self.inputs_parametri.clear()
+        self.label_messaggio.setText("")
+        self.sottotitolo.setText("Seleziona una coltura dal catalogo per modificarne i parametri ottimali.")
+        self.mostra_griglia_colture()
+
+    def svuota_layout_dinamico(self):
+        if self.layout_contenuto_dinamico is not None:
+            while self.layout_contenuto_dinamico.count():
+                item = self.layout_contenuto_dinamico.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.hide()
+                    widget.setParent(None)
+                    widget.deleteLater()
+
+    def torna_al_menu_operatore(self):
+        self.ripristina_schermata_iniziale()
+        self.proiettore_pagine.setCurrentIndex(8)
