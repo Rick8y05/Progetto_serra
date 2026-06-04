@@ -1,0 +1,22 @@
+{
+    "basilico": {
+        "temperatura": 30,
+        "umidita": 15
+    },
+    "rosmarino": {
+        "temperatura": 26,
+        "umidita": 25
+    },
+    "maggiorana": {
+        "temperatura": 26,
+        "umidita": 25
+    },
+    "pomodori": {
+        "temperatura": 26,
+        "umidita": 25
+    },
+    "meloni": {
+        "temperatura": 26,
+        "umidita": 25
+    }
+}
