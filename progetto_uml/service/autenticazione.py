@@ -1,9 +1,15 @@
 from repository.utenti_repository import UtentiRepository
 from models.Utente import Utente
 
+from repository.utenti_repository import UtentiRepository
+from models.Utente import Utente
 
+from repository.utenti_repository import UtentiRepository
+from models.Utente import Utente
+
+# classe che gestisce l'autenticazione degli utenti
 class Autenticazione:
-    # ruoli possibili nel sistema
+    # ruoli possibili
     PROPRIETARIO = "proprietario"
     OPERATORE = "operatore"
 
@@ -11,21 +17,22 @@ class Autenticazione:
         self.repo = UtentiRepository()
         self.utente_corrente = None
 
-    # login utente
+    # login utente registrato con email e password (verificate nel file utenti.json)
     def login(self, email, password):
         email = email.strip()
         password = password.strip()
 
         utenti = self.repo.get_all()
 
-        # scorre lista utenti fino a trovare una corrispondenza di email e password
+        # scorre lista utenti fino a trovare un eventuale corrispondenza di email e password con email e password già registrate
         for u in utenti:
             if u["email"] == email and u["password"] == password:
+                # crea un nuovo oggetto Utente 
                 return Utente(u["nome"], u["email"], u["password"], u["ruolo"], )
 
         return None
 
-    # registrazione proprietario
+    # registrazione di un nuovo proprietario
     def register_proprietario(self, nome, email, password):
         email = email.strip()
         password = password.strip()
