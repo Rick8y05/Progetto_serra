@@ -3,7 +3,6 @@ from models.Utente import Utente
 
 
 class Autenticazione:
-
     # ruoli possibili nel sistema
     PROPRIETARIO = "proprietario"
     OPERATORE = "operatore"
@@ -22,7 +21,7 @@ class Autenticazione:
         # scorre lista utenti fino a trovare una corrispondenza di email e password
         for u in utenti:
             if u["email"] == email and u["password"] == password:
-                return Utente(u["nome"], u["email"], u["password"], u["ruolo"],)
+                return Utente(u["nome"], u["email"], u["password"], u["ruolo"], )
 
         return None
 
@@ -49,7 +48,7 @@ class Autenticazione:
         # salva la lista utenti aggiornata nel file json
         self.repo.save_all(utenti)
         return True
-    
+
     # utenti
     def get_utenti(self):
         utenti = self.repo.get_all()
