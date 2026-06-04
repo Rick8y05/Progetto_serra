@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton, QApplication
 from PyQt6.QtCore import Qt
 
-
+# menu dell'operatore
 class MenuOperatore(QWidget):
     def __init__(self, gestore_serra, gestore_colture, gestore_tempo, proiettore_pagine):
         super().__init__()
@@ -31,10 +31,12 @@ class MenuOperatore(QWidget):
                          background: transparent;
                      }""")
 
+        # titolo con benvenuto
         self.testo_benvenuto = QLabel(f"Benvenuto {self.nome_operatore}")
         self.testo_benvenuto.setStyleSheet("font-size: 32px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.5px;")
         self.testo_benvenuto.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        # sottotitolo
         sottotitolo = QLabel("Pannello Operatore — Monitoraggio e Gestione Colture")
         sottotitolo.setStyleSheet("font-size: 14px; color: #B0C4DE; font-weight: 400; margin-top: 8px;")
         sottotitolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -56,14 +58,15 @@ class MenuOperatore(QWidget):
         layout_bottoni.setContentsMargins(25, 25, 25, 25)
         layout_bottoni.setSpacing(14)
 
-        # Pulsante 1 -> Indice 9 (Visualizza Dati Serra Operatore)
+        # pulsante visualizza dati serra operatore
         btn_visualizza_dati_serra = QPushButton("Visualizza Dati Serra")
         btn_visualizza_dati_serra.clicked.connect(lambda: self.proiettore_pagine.setCurrentIndex(9))
 
-        # IL BUG ERA QUI! Ora è impostato correttamente all'indice 10 (AggiornaParametriColtureOperatore)
+        # pulsante aggiorna parametri colture operatore
         btn_configura_parametri_coltura = QPushButton("Configura Parametri Coltura")
         btn_configura_parametri_coltura.clicked.connect(lambda: self.proiettore_pagine.setCurrentIndex(10))
 
+        # pulsante per disconnessione
         btn_logout = QPushButton("Disconnetti")
         btn_logout.clicked.connect(QApplication.quit)
 
