@@ -1,4 +1,4 @@
-# definizione classe Utente (nome, email, password, ruolo assegnato)
+# definizione classe Utente con nome, email, password, ruolo assegnato (proprietario/operatore)
 class Utente:
     def __init__(self, nome, email, password, ruolo):
         self.nome = nome.strip()
@@ -6,6 +6,6 @@ class Utente:
         self.password = password.strip()
         self.ruolo = ruolo.strip().lower()
 
-    # rappresentazione utile per debug
+    # restituisce una rappresentazione testuale dell'oggetto, utile per debug e stampa delle informazioni principali
     def __str__(self):
         return f"Utente(nome={self.nome}, email={self.email}, ruolo={self.ruolo})"
