@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFrame
 from PyQt6.QtCore import Qt
 
-
+# schermata di registrazione utenti (permette la creazione di un nuovo proprietario nel sistema)
 class SchermataRegistrazione(QWidget):
 
     def __init__(self, stack, auth):
@@ -10,6 +10,7 @@ class SchermataRegistrazione(QWidget):
         self.auth = auth
         self.init_ui()
 
+    # costruzione interfaccia grafica
     def init_ui(self):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -17,7 +18,6 @@ class SchermataRegistrazione(QWidget):
         card = QFrame()
         card.setFixedWidth(450)
 
-        # FOGLIO DI STILE: Sistemati i colori dei testi per renderli leggibili sullo sfondo scuro
         card.setStyleSheet("""
             QFrame {
                 background-color: rgba(255, 255, 255, 0.04);
@@ -53,17 +53,21 @@ class SchermataRegistrazione(QWidget):
         card_layout.setContentsMargins(40, 40, 40, 40)
         card_layout.setSpacing(15)
 
+        # titolo schermata
         titolo = QLabel("REGISTRAZIONE")
         titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         titolo.setStyleSheet("font-size: 26px; font-weight: 700; background: transparent;")
         card_layout.addWidget(titolo)
 
+        # input per inserimento nome
         self.nome = QLineEdit()
         self.nome.setPlaceholderText("Nome")
 
+        # input per inserimento email
         self.email = QLineEdit()
         self.email.setPlaceholderText("Email")
 
+        # input per inserimento password
         self.password = QLineEdit()
         self.password.setPlaceholderText("Password")
         self.password.setEchoMode(QLineEdit.EchoMode.Password)
@@ -71,6 +75,7 @@ class SchermataRegistrazione(QWidget):
         self.msg = QLabel("")
         self.msg.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        # pulsanti
         btn_reg = QPushButton("Registra")
         btn_back = QPushButton("Indietro")
 
@@ -87,47 +92,52 @@ class SchermataRegistrazione(QWidget):
         layout.addWidget(card)
         self.setLayout(layout)
 
+    # logica registrazione utente
     def registra(self):
         nome = self.nome.text().strip()
         email = self.email.text().strip()
         password = self.password.text().strip()
 
-        # Stile di default per i messaggi di errore
+        # stile per i messaggi di errore
         self.msg.setStyleSheet("color: #FF3B30; font-weight: 600; font-size: 14px; background: transparent;")
 
-        # ---------------- CONTROLLI BASE ----------------
+        # controllo campi lasciati vuoti
         if nome == "" or email == "" or password == "":
             self.msg.setText("Compila tutti i campi")
             return
 
-        # Controllo email
+        # controllo email (con domini)
         if "@" not in email:
             self.msg.setText("Email non valida")
             return
 
-        # FIX: Usato [-1] per estrarre l'ultimo segmento ed evitare bug con doppie chiocciole
         dominio = email.split("@")[-1]
+        # elenco domini validi
         domini_validi = ["gmail.com", "outlook.com", "libero.it", "hotmail.com"]
 
+        # dominio non valido
         if dominio not in domini_validi:
             self.msg.setText("Dominio email non valido")
             return
 
-        # Controllo password
+        # controllo lunghezza minima password
         if len(password) < 6:
             self.msg.setText("Password troppo corta (min 6)")
             return
 
+        # elenco caratteri speciali da poter inserire
         speciali = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "+", "=", "[", "]", "{", "}", "|", ";",
                     ":", ",", ".", "<", ">", "?"]
 
+        # se non viene inserito almeno un carattere speciale, lo richiede
         if not any(c in speciali for c in password):
             self.msg.setText("Serve almeno un carattere speciale")
             return
 
-        # ---------------- REGISTRAZIONE ----------------
+        # registrazione con nome, email e password
         ok = self.auth.register_proprietario(nome, email, password)
 
+        # se la registrazione va a buon fine
         if ok:
             # Svuota i campi così al prossimo accesso la schermata è pulita
             self.nome.clear()
@@ -141,7 +151,7 @@ class SchermataRegistrazione(QWidget):
             self.msg.setText("Utente già esistente")
 
     def torna_indietro(self):
-        # Quando l'utente clicca "Indietro", puliamo la schermata da vecchi testi o errori
+        # Quando l'utente clicca "Indietro", la schermata viene ripulita da vecchi testi o errori
         self.nome.clear()
         self.email.clear()
         self.password.clear()
