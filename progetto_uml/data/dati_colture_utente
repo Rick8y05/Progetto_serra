@@ -1,0 +1,14 @@
+{
+    "Alessio Menotti": {
+        "pianta": "basilico",
+        "busto": "50",
+        "altezza": "10",
+        "imp_fabbrica": false
+    },
+    "Giovanni Bertozzi": {
+        "pianta": "basilico",
+        "busto": "10",
+        "altezza": "10",
+        "imp_fabbrica": false
+    }
+}
