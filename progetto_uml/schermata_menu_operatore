@@ -1,0 +1,114 @@
+from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton, QApplication
+from PyQt6.QtCore import Qt
+
+
+class MenuOperatore(QWidget):
+    def __init__(self, gestore_serra, gestore_colture, gestore_tempo, proiettore_pagine):
+        super().__init__()
+        self.gestore_serra = gestore_serra
+        self.gestore_colture = gestore_colture
+        self.gestore_tempo = gestore_tempo
+        self.nome_operatore = ""
+        self.proiettore_pagine = proiettore_pagine
+
+        self.setWindowTitle("Pannello di Controllo Operatore")
+        self.finestra_principale()
+
+    def finestra_principale(self):
+        self.setStyleSheet("""
+            QWidget {
+                font-family: '.AppleSystemUIFont', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+            }
+        """)
+
+        layout_principale = QVBoxLayout()
+        layout_principale.setContentsMargins(50, 60, 50, 60)
+        layout_principale.setSpacing(0)
+
+        self.setObjectName("FinestraPrincipale")
+        self.setStyleSheet("""
+                     QWidget#FinestraPrincipale {
+                         background: transparent;
+                     }""")
+
+        self.testo_benvenuto = QLabel(f"Benvenuto {self.nome_operatore}")
+        self.testo_benvenuto.setStyleSheet("font-size: 32px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.5px;")
+        self.testo_benvenuto.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        sottotitolo = QLabel("Pannello Operatore — Monitoraggio e Gestione Colture")
+        sottotitolo.setStyleSheet("font-size: 14px; color: #B0C4DE; font-weight: 400; margin-top: 8px;")
+        sottotitolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        layout_principale.addWidget(self.testo_benvenuto)
+        layout_principale.addWidget(sottotitolo)
+        layout_principale.addSpacing(50)
+
+        pannello_comandi = QWidget()
+        pannello_comandi.setStyleSheet("""
+            QWidget {
+                background-color: rgba(255, 255, 255, 0.07);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                border-radius: 16px;
+            }
+        """)
+
+        layout_bottoni = QVBoxLayout(pannello_comandi)
+        layout_bottoni.setContentsMargins(25, 25, 25, 25)
+        layout_bottoni.setSpacing(14)
+
+        # Pulsante 1 -> Indice 9 (Visualizza Dati Serra Operatore)
+        btn_visualizza_dati_serra = QPushButton("Visualizza Dati Serra")
+        btn_visualizza_dati_serra.clicked.connect(lambda: self.proiettore_pagine.setCurrentIndex(9))
+
+        # IL BUG ERA QUI! Ora è impostato correttamente all'indice 10 (AggiornaParametriColtureOperatore)
+        btn_configura_parametri_coltura = QPushButton("Configura Parametri Coltura")
+        btn_configura_parametri_coltura.clicked.connect(lambda: self.proiettore_pagine.setCurrentIndex(10))
+
+        btn_logout = QPushButton("Disconnetti")
+        btn_logout.clicked.connect(QApplication.quit)
+
+        stile_mac_premium = """
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: #FFFFFF;
+                font-size: 14px;
+                font-weight: 500;
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                border-radius: 10px;
+                padding: 14px 28px;
+                min-width: 280px;
+                text-align: center;
+            }
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.2);
+                border-color: rgba(255, 255, 255, 0.3);
+            }
+            QPushButton:pressed {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+        """
+
+        btn_visualizza_dati_serra.setStyleSheet(stile_mac_premium)
+        btn_configura_parametri_coltura.setStyleSheet(stile_mac_premium)
+        btn_logout.setStyleSheet(stile_mac_premium)
+
+        btn_visualizza_dati_serra.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_configura_parametri_coltura.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_logout.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        layout_bottoni.addWidget(btn_visualizza_dati_serra, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout_bottoni.addWidget(btn_configura_parametri_coltura, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout_bottoni.addWidget(btn_logout, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        layout_principale.addWidget(pannello_comandi, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout_principale.addStretch(1)
+
+        self.setLayout(layout_principale)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        if self.proiettore_pagine.utente_corrente is not None:
+            utente = self.proiettore_pagine.utente_corrente
+            self.nome_operatore = utente.nome if hasattr(utente, 'nome') else utente[0]
+            if hasattr(self, 'testo_benvenuto') and self.testo_benvenuto:
+                self.testo_benvenuto.setText(f"Benvenuto {self.nome_operatore}")
