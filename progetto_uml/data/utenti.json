@@ -16,5 +16,11 @@
         "email": "antonio.pierini@gmail.com",
         "password": "AntonioPierini.99",
         "ruolo": "operatore"
+    },
+    {
+        "nome": "Alessio Menotti",
+        "email": "alemeno2005@gmail.com",
+        "password": "Rudi1970!",
+        "ruolo": "proprietario"
     }
 ]
