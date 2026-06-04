@@ -1,46 +1,31 @@
-# gestore tempo
-
 import threading
 import time
-
-
 class GestoreTempo:
-    # Gestore di simulazione e aggiornamento dei sensori delle serre.
-  
-
-    def __init__(self, gestore_serra, intervallo=10):
-        
+    def __init__(self, gestore_serra, intervallo: float):
         self.gestore_serra = gestore_serra
         self.intervallo = intervallo
-        self.attivo = False
-        self.thread_simulazione = None
+        self.conta_cicli = 0
+        self.simulazione_attiva = False
+        self.thread_tempo = None
 
-    def avvia(self):
-        if not self.attivo:
-            self.attivo = True
-            self.thread_simulazione = threading.Thread(target=self._esegui_ciclo, daemon=True)
-            self.thread_simulazione.start()
-            print("OK: Simulazione sensori avviata")
+    def loop_tempo(self):
+        #while non è invalidante gira separatamente da tutto il resto grazie a tred
+        while self.simulazione_attiva:
+            time.sleep(self.intervallo)  # time slep non invalida perche gira separatamente da tutto il resto
+            self.conta_cicli +=1
+            #effettua chiamata aggiornamento sensori ogni tot tempo
+            self.gestore_serra.simulazione_aggiornamento_sensori()
+            self.gestore_serra.controllo_periodico()
 
-    def ferma(self):
-        self.attivo = False
-        if self.thread_simulazione:
-            self.thread_simulazione.join(timeout=2)
-        print("OK: Simulazione sensori fermata")
+    def avvia(self):#chiamata per avviare il loop ad inzio simulazione
+        if not self.simulazione_attiva:
+            self.simulazione_attiva = True
+            self.thread_tempo = threading.Thread(target=self.loop_tempo, daemon=True)
+            #la riga sopra con target serve a dire hai creato il ciclo di lavoro alternativo e deve fare self.loop_tempo, è un puntatore)
+            #daemon serve per dire se il main principale va in arresto fermati pure tredsecondario
+            #di default è su false e metterlo su true è una sicurezza in più anche se abbiamo fatto esci
+            self.thread_tempo.start()
 
-    def _esegui_ciclo(self):
-        while self.attivo:
-            try:
-                # Esegue l'aggiornamento automatico delle serre
-                for n_univoco, serra in self.gestore_serra.serre_attive.items():
-                    if serra.modalita.lower() == "automatica":
-                        serra.mod_automatica()
-                
-                # Attende prima del prossimo aggiornamento
-                time.sleep(self.intervallo)
-            except Exception as e:
-                print(f"AVVISO: Errore nel ciclo di simulazione: {e}")
-                continue
 
-    def set_intervallo(self, intervallo):
-        self.intervallo = intervallo
+    def ferma(self):#chiusura loop fine simulazione
+            self.simulazione_attiva = False
