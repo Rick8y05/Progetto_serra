@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFrame
 from PyQt6.QtCore import Qt
 
-
+# schermata di login dell'applicazione
 class SchermataLogin(QWidget):
     def __init__(self, stack, auth):
         super().__init__()
@@ -9,6 +9,7 @@ class SchermataLogin(QWidget):
         self.auth = auth
         self.init_ui()
 
+    # costruzione dell'interfaccia grafica
     def init_ui(self):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -27,17 +28,20 @@ class SchermataLogin(QWidget):
         card_layout.setContentsMargins(40, 40, 40, 40)
         card_layout.setSpacing(15)
 
+        # titolo schermata
         titolo = QLabel("LOGIN")
         titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         titolo.setStyleSheet("font-size: 28px; font-weight: 700;")
         card_layout.addWidget(titolo)
 
+        # input di email e password utente registrato
         self.email = QLineEdit()
         self.email.setPlaceholderText("Email")
         self.password = QLineEdit()
         self.password.setPlaceholderText("Password")
         self.password.setEchoMode(QLineEdit.EchoMode.Password)
 
+        # messaggi di errore
         self.msg = QLabel("")
         self.msg.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.msg.setStyleSheet("color: #FF3B30; font-weight: 600; font-size: 14px;")
@@ -46,6 +50,7 @@ class SchermataLogin(QWidget):
         card_layout.addWidget(self.password)
         card_layout.addWidget(self.msg)
 
+        # pulsanti per scelta "Accedi"/"Registrati"
         btn_login = QPushButton("Accedi")
         btn_reg = QPushButton("Registrati")
 
@@ -58,16 +63,19 @@ class SchermataLogin(QWidget):
         layout.addWidget(card)
         self.setLayout(layout)
 
+    # gestione login utente
     def login(self):
         email = self.email.text().strip()
         password = self.password.text().strip()
 
+        # mancato inserimento di email o password (campi vuoti)
         if not email or not password:
             self.msg.setText("Compila tutti i campi")
             return
 
         utente = self.auth.login(email, password)
 
+        # se email e password non corrispondono a valori registrati, restituisce errore
         if not utente:
             self.msg.setText("Email o password non corretti")
             return
@@ -80,10 +88,10 @@ class SchermataLogin(QWidget):
         self.email.clear()
         self.password.clear()
 
-        # Scelta pagina basata sul ruolo (usa .ruolo, non l'indice)
+        # Scelta pagina basata sul ruolo
         target_index = 0 if getattr(utente, 'ruolo', '') == "proprietario" else 8
 
-        # Navigazione sicura
+        # Navigazione sicura tra le schermate
         self.stack.setCurrentIndex(target_index)
 
         # Aggiornamento opzionale pagina di destinazione
@@ -91,4 +99,5 @@ class SchermataLogin(QWidget):
         if hasattr(pagina, "aggiorna_utente"):
             pagina.aggiorna_utente()
 
+        # messaggio di benvenuto personalizzato
         print(f"Benvenuto, {getattr(utente, 'nome', 'Utente')}")
