@@ -1,0 +1,22 @@
+{
+    "sr-50010": {
+        "proprietario": "nessuno",
+        "modalita": "automatico",
+        "pianta_selezionata": "rosmarino"
+    },
+    "sr-50011": {
+        "proprietario": "Alessio Menotti",
+        "modalita": "automatico",
+        "pianta_selezionata": "basilico"
+    },
+    "sr-50012": {
+        "proprietario": "nessuno",
+        "modalita": "manuale",
+        "pianta_selezionata": "rosmarino"
+    },
+    "sr-50013": {
+        "proprietario": "Alessio Menotti",
+        "modalita": "manuale",
+        "pianta_selezionata": "basilico"
+    }
+}
