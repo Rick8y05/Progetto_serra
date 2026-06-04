@@ -1,5 +1,7 @@
 from models.sensore import Sensori
 from models.attuatori import Attuatori
+
+# definizione della classe Serra che rappresenta una serra automatizzata associata a una coltura e a un proprietario
 class Serra:
     def __init__ (self,proprietario: str,coltura_attiva: dict, modalita: str,dati_temperature, dati_umidita, codice_univoco: str, nome_pianta: str):
         self.nome_pianta = nome_pianta
@@ -17,57 +19,75 @@ class Serra:
         self.ventole=Attuatori("ventole_aereazione", False)
         self.sistema_irrigazione = Attuatori("sistema_irrigazione", False)
         self.lampada_UV = Attuatori("lampadaUV", False)
+    
+    # gestisce automaticamente gli attuatori
     def mod_automatica(self):
         self.temperatura_serra = self.T1.get_dati()
         self.umidita_serra = self.U1.get_dati()
+        # controllo temperatura alta
         if self.temperatura_serra>self.coltura_attiva["temperatura"]:
             self.ventole.accendi()
         else:
             self.ventole.spegni()
+        # controllo temperatura bassa
         if  self.temperatura_serra< self.coltura_attiva["temperatura"]:
             self.lampada_UV.accendi()
         else:
             self.lampada_UV.spegni()
+        # controllo umidità bassa
         if self.umidita_serra< self.coltura_attiva["umidita"]:
             self.sistema_irrigazione.accendi()
         else:
             self.sistema_irrigazione.spegni()
+
+    # modalità manuale delle ventole
     def mod_manuale_ventole(self,stato: bool):
         if stato:
             self.ventole.accendi()
         else: self.ventole.spegni()
+    # modalità manuale della lampada UV
     def mod_manuale_lampada_UV(self,stato: bool):
         if stato:
             self.lampada_UV.accendi()
         else:
             self.lampada_UV.spegni()
+    # modalità manuale sistema di irrigazione
     def mod_manuale_sistema_irrigazione(self,stato: bool):
         if stato:
             self.sistema_irrigazione.accendi()
         else:
             self.sistema_irrigazione.spegni()
+
+    # restituisce la temperatura corrente della serra
     @property
     def get_temperatura_serra(self) -> float:
         return self.temperatura_serra
+    # restituisce l'umidità corrente della serra
     @property
     def get_umidita_serra(self) -> float:
         return self.umidita_serra
+    # restituisce i dati della coltura associata
     @property
     def get_dati_coltura(self) -> dict: #dict type Hint per dizionario
         return self.coltura_attiva
+    # restituisce lo stato delle ventole
     @property
     def get_stato_ventole(self):
         return self.ventole._stato
+    # restituisce lo stato della lampada UV
     @property
     def get_stato_lampadaUV(self):
         return self.lampada_UV._stato
+    # restituisce lo stato del sistema di irrigazione
     @property
     def get_stato_sistema_irrigazione(self):
         return self.sistema_irrigazione._stato
+    # assegna una nuova coltura alla serra
     def set_coltura(self,coltura_attiva,pianta):
         self.coltura_attiva = coltura_attiva
         self.nome_pianta = pianta
 
+    # aggiorna le letture dei sensori
     def aggiornamento_sensori(self):
         self.T1.aggiornamento_sensore()
         self.U1.aggiornamento_sensore()
