@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame
 from PyQt6.QtCore import Qt, QTimer
 
-
+# configurazione parametri coltura
 class SchermataConfiguraParametriColtura(QWidget):
     def __init__(self, proiettore_pagine, gestore_serra, gestore_coltura):
         super().__init__()
@@ -37,6 +37,7 @@ class SchermataConfiguraParametriColtura(QWidget):
         self.layout_card.setContentsMargins(50, 50, 50, 50)
         self.layout_card.setSpacing(20)
 
+        # titolo
         titolo = QLabel("SELEZIONE PARAMETRI COLTURA")
         titolo.setStyleSheet("""
             QLabel {
@@ -51,6 +52,7 @@ class SchermataConfiguraParametriColtura(QWidget):
         titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout_card.addWidget(titolo)
 
+        # sottotitolo
         self.sottotitolo = QLabel("Seleziona la serra su cui intervenire")
         self.sottotitolo.setStyleSheet(
             "font-size: 18px; color: rgba(255, 255, 255, 0.5); border: none; background: transparent;")
@@ -69,6 +71,7 @@ class SchermataConfiguraParametriColtura(QWidget):
         self.layout_card.addWidget(self.label_messaggio)
         self.layout_card.addSpacing(10)
 
+        # bottone annulla
         btn_annulla = QPushButton("Annulla e torna al Menù")
         btn_annulla.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_annulla.setStyleSheet("""
@@ -102,13 +105,16 @@ class SchermataConfiguraParametriColtura(QWidget):
                     widget.deleteLater()
                 else:
                     del item
-
+    
+    # schermata selezione serre
     def selezione_serra(self):
         self.svuota_layout_bottoni()
         self.sottotitolo.setText("Seleziona la serra su cui intervenire")
 
+        # recupero serre utente
         n_univoci_proprietario = self.gestore_serra.parco_serre_proprietario(self.proprietario)
 
+        # se non vi sono serre registrate per quel proprietario
         if not n_univoci_proprietario:
             label_vuota = QLabel("Non hai nessuna serra registrata nel tuo profilo.")
             label_vuota.setStyleSheet(
@@ -141,6 +147,7 @@ class SchermataConfiguraParametriColtura(QWidget):
 
         self.layout_bottoni_colture.addStretch(1)
 
+    # schermata selezione colture per serra
     def selezione_coltura(self, n_univoco):
         self.svuota_layout_bottoni()
         self.sottotitolo.setText(f"Scegli la coltura per la Serra {n_univoco}")
@@ -182,6 +189,7 @@ class SchermataConfiguraParametriColtura(QWidget):
 
         self.layout_bottoni_colture.addStretch(1)
 
+    # conferma modifica coltura serra
     def conferma_selezione(self, id_serra, pianta_scelta):
         self.gestore_serra.modifica_coltura_serra(id_serra, pianta_scelta)
         self.label_messaggio.setStyleSheet("color: #34C759; font-weight: 600; border: none; background: transparent;")
@@ -193,16 +201,13 @@ class SchermataConfiguraParametriColtura(QWidget):
         self.label_messaggio.setText("")
         self.proiettore_pagine.setCurrentIndex(0)
 
-    # RISOLUZIONE: Quando lo stack carica la vista, aggiorna l'utente in sicurezza e rigenera i bottoni delle serre
     def showEvent(self, event):
         super().showEvent(event)
 
-        # 1. Controllo di sicurezza sull'utente corrente dello stack
         if self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
             self.proprietario = utente.nome if hasattr(utente, 'nome') else utente[0]
 
-        # 2. Resetta i vecchi messaggi, svuota il layout e rigenera le serre del proprietario
         if hasattr(self, 'label_messaggio') and self.label_messaggio:
             self.label_messaggio.setText("")
 
