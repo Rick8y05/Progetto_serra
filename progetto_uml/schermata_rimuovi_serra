@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame
 from PyQt6.QtCore import Qt, QTimer
 
-
+# rimozione serra
 class SchermataRimuoviSerra(QWidget):
     def __init__(self, proiettore_pagine, gestore_serra):
         super().__init__()
@@ -36,6 +36,7 @@ class SchermataRimuoviSerra(QWidget):
         self.layout_card.setContentsMargins(50, 50, 50, 50)
         self.layout_card.setSpacing(20)
 
+        # titolo
         titolo = QLabel("RIMUOVI SERRA")
         titolo.setStyleSheet("""
             QLabel {
@@ -50,6 +51,7 @@ class SchermataRimuoviSerra(QWidget):
         titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout_card.addWidget(titolo)
 
+        # sottotitolo
         sottotitolo = QLabel("Seleziona la serra che desideri rimuovere dal tuo parco serre")
         sottotitolo.setStyleSheet(
             "font-size: 18px; color: rgba(255, 255, 255, 0.5); border: none; background: transparent;")
@@ -67,7 +69,8 @@ class SchermataRimuoviSerra(QWidget):
         self.label_messaggio.setStyleSheet("font-size: 14px; font-weight: 500; border: none; background: transparent;")
         self.layout_card.addWidget(self.label_messaggio)
         self.layout_card.addSpacing(10)
-
+        
+        # bottone annulla e torna al menu
         btn_annulla = QPushButton("Annulla e torna al Menù")
         btn_annulla.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_annulla.setStyleSheet("""
@@ -88,10 +91,8 @@ class SchermataRimuoviSerra(QWidget):
         layout_principale.addWidget(card_centrale)
         self.setLayout(layout_principale)
 
-        # CORREZIONE 1: Rimosso aggiorna_pulsanti_serre() da qui perché all'avvio l'utente è ancora vuoto
 
     def aggiorna_pulsanti_serre(self):
-        # CORRETTO: Svuota totalmente il layout eliminando sia i Widget che gli Spacer (Stretch)
         if self.layout_bottoni_serre is not None:
             while self.layout_bottoni_serre.count():
                 item = self.layout_bottoni_serre.takeAt(0)
@@ -99,10 +100,11 @@ class SchermataRimuoviSerra(QWidget):
                 if widget is not None:
                     widget.setParent(None)
                     widget.deleteLater()
-                del item  # Rimuove l'item di layout (elimina anche gli stretch rimasti liberi)
+                del item  
 
         n_univoci_proprietario = self.gestore_serra.parco_serre_proprietario(self.proprietario)
 
+        # se non vengono trovate serre registrate
         if not n_univoci_proprietario:
             label_vuota = QLabel("Non hai nessuna serra registrata nel tuo profilo.")
             label_vuota.setStyleSheet(
@@ -135,7 +137,7 @@ class SchermataRimuoviSerra(QWidget):
             self.layout_bottoni_serre.addWidget(btn_serra)
 
         self.layout_bottoni_serre.addStretch(1)
-
+    
     def conferma_rimozione(self, id_scelto):
         successo, messaggio = self.gestore_serra.rimuovi_serra(id_scelto, self.proprietario)
 
@@ -144,10 +146,8 @@ class SchermataRimuoviSerra(QWidget):
                 "color: #34C759; font-weight: 600; border: none; background: transparent;")
             self.label_messaggio.setText(f" {messaggio}")
 
-            # Notifica globale del cambiamento alle altre schermate
             self.notifica_modifica_parco_serre()
 
-            # Aggiorna subito i pulsanti di questa schermata prima di andartene
             self.aggiorna_pulsanti_serre()
             QTimer.singleShot(1200, self.torna_al_menu)
         else:
@@ -156,10 +156,8 @@ class SchermataRimuoviSerra(QWidget):
             self.label_messaggio.setText(f"✕ {messaggio}")
 
     def notifica_modifica_parco_serre(self):
-        # Scansiona il proiettore delle pagine per dire a tutte le altre schermate di aggiornare l'elenco delle loro serre
         for i in range(self.proiettore_pagine.count()):
             widget_corrente = self.proiettore_pagine.widget(i)
-            # Evita di chiamare ricorsivamente se stessa
             if widget_corrente != self:
                 if hasattr(widget_corrente, 'aggiorna_pulsanti_serre'):
                     widget_corrente.aggiorna_pulsanti_serre()
@@ -170,15 +168,11 @@ class SchermataRimuoviSerra(QWidget):
         self.label_messaggio.setText("")
         self.proiettore_pagine.setCurrentIndex(0)
 
-    # CORREZIONE 2: showEvent ripulito dall'esempio finto e collegato al vero aggiornamento pulsanti
     def showEvent(self, event):
         super().showEvent(event)
 
-        # 1. Controllo di sicurezza: se l'utente non c'è ancora, evita il caricamento
         if self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
-            # Recupera il nome se è un oggetto, o l'indice [0] se è una lista/tupla
             self.proprietario = utente.nome if hasattr(utente, 'nome') else utente[0]
 
-        # 2. Richiama il vero metodo di refresh per caricare i bottoni corretti
         self.aggiorna_pulsanti_serre()
