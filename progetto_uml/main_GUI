@@ -12,10 +12,10 @@ from GUI.schermata_azzionamento_attuatori import AzionamentoAttuatori
 from GUI.schermata_seleziona_modalità_funzionamento import SelezionaModalitaFunzionamento
 from GUI.schermata_menu_operatore import MenuOperatore
 from GUI.schermata_visualizza_dati_serra_operatore import VisualizzaDatiSerraOperatore
-from GUI.schermata_aggiornamento_parametri_colture import AggiornaParametriColtureOperatore
+from GUI.schermata_aggiornamento_parametri import AggiornaParametriColtureOperatore
 from service.autenticazione import Autenticazione
 from GUI.menu_autenticazione import SchermataLogin
-from GUI.menu_registrazione import SchermataRegistrazione
+from GUI.schermata_registrazione import SchermataRegistrazione
 import sys
 from PyQt6.QtWidgets import QApplication,QStackedWidget
 
@@ -77,7 +77,7 @@ schermata_seleziona_modalita_funzionamento= SelezionaModalitaFunzionamento(proie
 schermata_menu_operatore = MenuOperatore(gestore_serra, gestore_colture, gestore_tempo,proiettore_pagine)
 schermata_visualizza_dati_serra_operatore =  VisualizzaDatiSerraOperatore(proiettore_pagine, gestore_serra, gestore_colture )
 schermata_aggiorna_parametri_colture = AggiornaParametriColtureOperatore(proiettore_pagine, gestore_serra, gestore_colture)
-scheramta_login = SchermataLogin(proiettore_pagine,gestore_autenticazione)
+schermata_login = SchermataLogin(proiettore_pagine,gestore_autenticazione)
 schermata_registrazione = SchermataRegistrazione(proiettore_pagine,gestore_autenticazione)
 
 # registrazione schermate
@@ -92,7 +92,7 @@ proiettore_pagine.addWidget(schermata_seleziona_modalita_funzionamento)#7
 proiettore_pagine.addWidget(schermata_menu_operatore)#8
 proiettore_pagine.addWidget(schermata_visualizza_dati_serra_operatore)#9
 proiettore_pagine.addWidget(schermata_aggiorna_parametri_colture)#10
-proiettore_pagine.addWidget(scheramta_login)#11
+proiettore_pagine.addWidget(schermata_login)#11
 proiettore_pagine.addWidget(schermata_registrazione)#12
 
 # schermata iniziale
@@ -110,4 +110,5 @@ repository_colture.salvatggio_dati(gestore_colture.dati_colture)
 gestore_tempo.ferma()
 
 sys.exit(status)
+
 
