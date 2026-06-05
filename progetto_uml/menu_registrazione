@@ -63,6 +63,10 @@ class SchermataRegistrazione(QWidget):
         self.nome = QLineEdit()
         self.nome.setPlaceholderText("Nome")
 
+        # input per inserimento cognome
+        self.cognome = QLineEdit()
+        self.cognome.setPlaceholderText("Cognome")
+
         # input per inserimento email
         self.email = QLineEdit()
         self.email.setPlaceholderText("Email")
@@ -83,6 +87,7 @@ class SchermataRegistrazione(QWidget):
         btn_back.clicked.connect(self.torna_indietro)
 
         card_layout.addWidget(self.nome)
+        card_layout.addWidget(self.cognome)
         card_layout.addWidget(self.email)
         card_layout.addWidget(self.password)
         card_layout.addWidget(self.msg)
@@ -95,6 +100,7 @@ class SchermataRegistrazione(QWidget):
     # logica registrazione utente
     def registra(self):
         nome = self.nome.text().strip()
+        cognome = self.cognome.text().strip()
         email = self.email.text().strip()
         password = self.password.text().strip()
 
@@ -102,7 +108,7 @@ class SchermataRegistrazione(QWidget):
         self.msg.setStyleSheet("color: #FF3B30; font-weight: 600; font-size: 14px; background: transparent;")
 
         # controllo campi lasciati vuoti
-        if nome == "" or email == "" or password == "":
+        if nome == "" or cognome == "" or email == "" or password == "":
             self.msg.setText("Compila tutti i campi")
             return
 
@@ -134,13 +140,14 @@ class SchermataRegistrazione(QWidget):
             self.msg.setText("Serve almeno un carattere speciale")
             return
 
-        # registrazione con nome, email e password
-        ok = self.auth.register_proprietario(nome, email, password)
+        # registrazione con nome, cognome, email e password
+        ok = self.auth.register_proprietario(nome, cognome, email, password)
 
         # se la registrazione va a buon fine
         if ok:
             # Svuota i campi così al prossimo accesso la schermata è pulita
             self.nome.clear()
+            self.cognome.clear()
             self.email.clear()
             self.password.clear()
             self.msg.setText("")
@@ -153,6 +160,7 @@ class SchermataRegistrazione(QWidget):
     def torna_indietro(self):
         # Quando l'utente clicca "Indietro", la schermata viene ripulita da vecchi testi o errori
         self.nome.clear()
+        self.cognome.clear()
         self.email.clear()
         self.password.clear()
         self.msg.setText("")
