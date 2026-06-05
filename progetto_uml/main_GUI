@@ -2,7 +2,7 @@ from repository.lettore_dati import DatiRepository
 from service.gestore_colture import GestoreColture
 from service.gestore_serra import GestoreSerra
 from GUI.menu_principale import InterfacciaMacOS
-from service.gestore_tempo import GestoreTempo
+from service.gestore_tempo_new import GestoreTempo
 from GUI.schermata_aggiungi_serra import SchermataAggiungiSerra
 from GUI.schermata_rimuovi_serra import SchermataRimuoviSerra
 from GUI.schermata_configura_parametri_coltura import SchermataConfiguraParametriColtura
@@ -11,7 +11,7 @@ from GUI.schermata_visualizza_dati_serra import VisualizzaDatiSerra
 from GUI.schermata_azzionamento_attuatori import AzionamentoAttuatori
 from GUI.schermata_seleziona_modalità_funzionamento import SelezionaModalitaFunzionamento
 from GUI.schermata_menu_operatore import MenuOperatore
-from GUI.schermata_visualizza_serra_operatore import VisualizzaDatiSerraOperatore
+from GUI.schermata_visualizza_dati_serra_operatore import VisualizzaDatiSerraOperatore
 from GUI.schermata_aggiornamento_parametri_colture import AggiornaParametriColtureOperatore
 from service.autenticazione import Autenticazione
 from GUI.menu_autenticazione import SchermataLogin
