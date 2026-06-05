@@ -189,7 +189,9 @@ class SchermataAggiungiSerra(QWidget):
 
     def showEvent(self, event):
         super().showEvent(event)
+
         if self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
-            self.proprietario = utente.nome if hasattr(utente, 'nome')
-        else utente[0]
+            self.proprietario = getattr(utente, "nome", None)
+        else:
+            self.proprietario = None
