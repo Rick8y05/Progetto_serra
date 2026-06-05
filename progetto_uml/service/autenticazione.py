@@ -27,13 +27,13 @@ class Autenticazione:
         # scorre lista utenti fino a trovare un eventuale corrispondenza di email e password con email e password già registrate
         for u in utenti:
             if u["email"] == email and u["password"] == password:
-                # crea un nuovo oggetto Utente 
-                return Utente(u["nome"], u["email"], u["password"], u["ruolo"], )
+                # crea un nuovo oggetto Utente, supportando anche il cognome
+                return Utente(u["nome"], u.get("cognome", ""), u["email"], u["password"], u["ruolo"])
 
         return None
 
     # registrazione di un nuovo proprietario
-    def register_proprietario(self, nome, email, password):
+    def register_proprietario(self, nome, cognome, email, password):
         email = email.strip()
         password = password.strip()
 
@@ -47,6 +47,7 @@ class Autenticazione:
         # aggiunge il nuovo prorietario alla lista utenti
         utenti.append({
             "nome": nome,
+            "cognome": cognome,
             "email": email,
             "password": password,
             "ruolo": self.PROPRIETARIO
