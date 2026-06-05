@@ -1,24 +1,28 @@
 [
     {
-        "nome": "Mario Rossi",
+        "nome": "Mario",
+        "cognome": "Rossi",
         "email": "mario.rossi@gmail.com",
         "password": "MarioRossi.99",
         "ruolo": "proprietario"
     },
     {
-        "nome": "Giuseppe Bianchi",
+        "nome": "Giuseppe",
+        "cognome": "Bianchi",
         "email": "giuseppe.bianchi@gmail.com",
         "password": "GiuseppeBianchi.99",
         "ruolo": "operatore"
     },
     {
-        "nome": "Antonio Pierini",
+        "nome": "Antonio",
+        "cognome": "Pierini",
         "email": "antonio.pierini@gmail.com",
         "password": "AntonioPierini.99",
         "ruolo": "operatore"
     },
     {
-        "nome": "Alessio Menotti",
+        "nome": "Alessio",
+        "cognome": "Menotti",
         "email": "alemeno2005@gmail.com",
         "password": "Rudi1970!",
         "ruolo": "proprietario"
