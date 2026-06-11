@@ -1,93 +1,133 @@
-from repository.utenti_repository import UtentiRepository
-from models.Utente import Utente
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFrame
+from PyQt6.QtCore import Qt
 
-from repository.utenti_repository import UtentiRepository
-from models.Utente import Utente
+# schermata di registrazione utenti (permette la creazione di un nuovo proprietario nel sistema)
+class SchermataRegistrazione(QWidget):
 
-from repository.utenti_repository import UtentiRepository
-from models.Utente import Utente
+    def __init__(self, stack, auth):
+        super().__init__()
+        self.stack = stack
+        self.auth = auth
+        self.init_ui()
 
-# classe che gestisce l'autenticazione degli utenti
-class Autenticazione:
-    # ruoli possibili
-    PROPRIETARIO = "proprietario"
-    OPERATORE = "operatore"
+    # costruzione interfaccia grafica
+    def init_ui(self):
+        layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-    def __init__(self):
-        self.repo = UtentiRepository()
-        self.utente_corrente = None
+        card = QFrame()
+        card.setFixedWidth(450)
 
-    # login utente registrato con email e password (verificate nel file utenti.json)
-    def login(self, email, password):
-        email = email.strip()
-        password = password.strip()
+        card.setStyleSheet("""
+            QFrame {
+                background-color: rgba(255, 255, 255, 0.04);
+                border-radius: 20px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            QLabel {
+                color: #FFFFFF;
+                border: none;
+                background: transparent;
+            }
+            QLineEdit {
+                background-color: rgba(255, 255, 255, 0.06); 
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px; 
+                padding: 12px; 
+                color: #FFFFFF;
+            }
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                padding: 12px;
+                color: #FFFFFF;
+                font-weight: 600;
+            }
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.15);
+            }
+        """)
 
-        utenti = self.repo.get_all()
+        card_layout = QVBoxLayout(card)
+        card_layout.setContentsMargins(40, 40, 40, 40)
+        card_layout.setSpacing(15)
 
-        # scorre lista utenti fino a trovare un eventuale corrispondenza di email e password con email e password già registrate
-        for u in utenti:
-            if u["email"] == email and u["password"] == password:
-                # crea un nuovo oggetto Utente, supportando anche il cognome
-                return Utente(u["nome"], u.get("cognome", ""), u["email"], u["password"], u["ruolo"])
+        # titolo schermata
+        titolo = QLabel("REGISTRAZIONE")
+        titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        titolo.setStyleSheet("font-size: 26px; font-weight: 700; background: transparent;")
+        card_layout.addWidget(titolo)
 
-        return None
+        # input per inserimento nome
+        self.nome = QLineEdit()
+        self.nome.setPlaceholderText("Nome")
 
-    # registrazione di un nuovo proprietario
-    def register_proprietario(self, nome, cognome, email, password):
-        nome = nome.strip()
-        cognome = cognome.strip()
-        email = email.strip()
-        password = password.strip()
+        # input per inserimento cognome
+        self.cognome = QLineEdit()
+        self.cognome.setPlaceholderText("Cognome")
 
-        if not nome or not cognome or not email or not password:
-            return False, "Compila tutti i campi"
-        
-        # controllo email
-        if "@" not in email:
-            return False, "Email non valida"
-        
-        dominio = email.split("@")[-1]
-        domini_validi = ["gmail.com", "outlook.com", "libero.it", "hotmail.com"]
+        # input per inserimento email
+        self.email = QLineEdit()
+        self.email.setPlaceholderText("Email")
 
-        if dominio not in domini_validi:
-            return False, "Dominio email non valido"
-        
-        # controllo password
-        if len(password) < 6:
-            return False, "Password troppo corta (min. 6 caratteri)"
-        
-        
-        speciali = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "+", "=", "[", "]", "{", "}", "|", ";",
-                    ":", ",", ".", "<", ">", "?"]
-        
-        if not any(c in speciali for c in password):
-            return False, "Serve almeno un carattere speciale"
+        # input per inserimento password
+        self.password = QLineEdit()
+        self.password.setPlaceholderText("Password")
+        self.password.setEchoMode(QLineEdit.EchoMode.Password)
 
-        utenti = self.repo.get_all()
+        self.msg = QLabel("")
+        self.msg.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.msg.setStyleSheet("color: #FF3B30; font-weight: 600; font-size: 14px;")
 
-        # controlla se l'email è già stata registrata
-        for u in utenti:
-            if u["email"] == email:
-                return False, "Utente già esistente"
+        # pulsanti
+        btn_reg = QPushButton("Registra")
+        btn_back = QPushButton("Indietro")
 
-        # aggiunge il nuovo prorietario alla lista utenti
-        utenti.append({
-            "nome": nome,
-            "cognome": cognome,
-            "email": email,
-            "password": password,
-            "ruolo": self.PROPRIETARIO
-        })
+        btn_reg.clicked.connect(self.registra)
+        btn_back.clicked.connect(self.torna_indietro)
 
-        # salva la lista utenti aggiornata nel file json
-        self.repo.save_all(utenti)
-        return True, "Registrazione completata"
+        card_layout.addWidget(self.nome)
+        card_layout.addWidget(self.cognome)
+        card_layout.addWidget(self.email)
+        card_layout.addWidget(self.password)
+        card_layout.addWidget(self.msg)
+        card_layout.addWidget(btn_reg)
+        card_layout.addWidget(btn_back)
 
-    # utenti
-    def get_utenti(self):
-        utenti = self.repo.get_all()
-        return {u["email"]: u for u in utenti}
+        layout.addWidget(card)
+        self.setLayout(layout)
 
-    # termine sessione
-    def logout(self):
-        self.utente_corrente = None
+    # logica registrazione utente
+    def registra(self):
+        # registrazione con nome, cognome, email e password
+        ok, messaggio = self.auth.register_proprietario(
+            self.nome.text(), 
+            self.cognome.text(), 
+            self.email.text(), 
+            self.password.text()
+        )
+
+        # se la registrazione va a buon fine
+        if ok:
+            # Svuota i campi così al prossimo accesso la schermata è pulita
+            self.nome.clear()
+            self.cognome.clear()
+            self.email.clear()
+            self.password.clear()
+            self.msg.setText("")
+
+            # Torna al login
+            self.stack.setCurrentIndex(11)
+
+        else:
+            self.msg.setText(messaggio)
+
+    def torna_indietro(self):
+        # Quando l'utente clicca "Indietro", la schermata viene ripulita da vecchi testi o errori
+        self.nome.clear()
+        self.cognome.clear()
+        self.email.clear()
+        self.password.clear()
+        self.msg.setText("")
+        self.stack.setCurrentIndex(11)
