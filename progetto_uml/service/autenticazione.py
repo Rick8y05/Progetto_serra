@@ -34,15 +34,41 @@ class Autenticazione:
 
     # registrazione di un nuovo proprietario
     def register_proprietario(self, nome, cognome, email, password):
+        nome = nome.strip()
+        cognome = cognome.strip()
         email = email.strip()
         password = password.strip()
+
+        if not nome or not cognome or not email or not password:
+            return False, "Compila tutti i campi"
+        
+        # controllo email
+        if "@" not in email:
+            return False, "Email non valida"
+        
+        dominio = email.split("@")[-1]
+        domini_validi = ["gmail.com", "outlook.com", "libero.it", "hotmail.com"]
+
+        if dominio not in domini_validi:
+            return False, "Dominio email non valido"
+        
+        # controllo password
+        if len(password) < 6:
+            return False, "Password troppo corta (min. 6 caratteri)"
+        
+        
+        speciali = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "+", "=", "[", "]", "{", "}", "|", ";",
+                    ":", ",", ".", "<", ">", "?"]
+        
+        if not any(c in speciali for c in password):
+            return False, "Serve almeno un carattere speciale"
 
         utenti = self.repo.get_all()
 
         # controlla se l'email è già stata registrata
         for u in utenti:
             if u["email"] == email:
-                return False
+                return False, "Utente già esistente"
 
         # aggiunge il nuovo prorietario alla lista utenti
         utenti.append({
@@ -55,7 +81,7 @@ class Autenticazione:
 
         # salva la lista utenti aggiornata nel file json
         self.repo.save_all(utenti)
-        return True
+        return True, "Registrazione completata"
 
     # utenti
     def get_utenti(self):
