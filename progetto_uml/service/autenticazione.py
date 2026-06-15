@@ -70,13 +70,15 @@ class Autenticazione:
             if u["email"] == email:
                 return False, "Utente già esistente"
 
+        nuovo_utente = Utente(nome, cognome, email, password, self.PROPRIETARIO)
+
         # aggiunge il nuovo prorietario alla lista utenti
         utenti.append({
-            "nome": nome,
-            "cognome": cognome,
-            "email": email,
-            "password": password,
-            "ruolo": self.PROPRIETARIO
+            "nome": nuovo_utente.nome,
+            "cognome": nuovo_utente.cognome,
+            "email": nuovo_utente.email,
+            "password": nuovo_utente.password,
+            "ruolo": nuovo_utente.ruolo,
         })
 
         # salva la lista utenti aggiornata nel file json
