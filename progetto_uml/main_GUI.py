@@ -15,7 +15,7 @@ from GUI.schermata_visualizza_dati_serra_operatore import VisualizzaDatiSerraOpe
 from GUI.schermata_aggiornamento_parametri import AggiornaParametriColtureOperatore
 from service.autenticazione import Autenticazione
 from GUI.menu_autenticazione import SchermataLogin
-from GUI.schermata_registrazione import SchermataRegistrazione
+from GUI.menu_registrazione import SchermataRegistrazione
 import sys
 from PyQt6.QtWidgets import QApplication,QStackedWidget
 
