@@ -192,6 +192,6 @@ class SchermataAggiungiSerra(QWidget):
 
         if self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
-            self.proprietario = getattr(utente, "nome", None)
+            self.proprietario = getattr(utente, 'full_name', None) or getattr(utente, 'nome', None) or (utente[0] if isinstance(utente, (list, tuple)) and len(utente) > 0 else str(utente))
         else:
             self.proprietario = None
