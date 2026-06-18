@@ -1,15 +1,15 @@
-
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFrame, QGridLayout
+import json
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFrame, QScrollArea, \
+    QGridLayout
 from PyQt6.QtCore import Qt, QTimer
 
-
+# aggiornamento parametri colture dell'operatore
 class AggiornaParametriColtureOperatore(QWidget):
     def __init__(self, proiettore_pagine, gestore_serra, gestore_colture):
         super().__init__()
         self.proiettore_pagine = proiettore_pagine
         self.gestore_serra = gestore_serra
         self.gestore_colture = gestore_colture
-
         self.operatore = ""
         self.contenitore_dinamico_wgt = None
         self.pianta_selezionata = None
@@ -43,7 +43,7 @@ class AggiornaParametriColtureOperatore(QWidget):
         self.layout_card.setContentsMargins(50, 50, 50, 50)
         self.layout_card.setSpacing(20)
 
-        # Titolo stile Rimuovi Serra
+        # titolo schermata
         self.titolo = QLabel("AGGIORNAMENTO PARAMETRI CATALOGO")
         self.titolo.setStyleSheet("""
             QLabel {
@@ -58,6 +58,7 @@ class AggiornaParametriColtureOperatore(QWidget):
         self.titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout_card.addWidget(self.titolo)
 
+        # sottotitolo
         self.sottotitolo = QLabel("Seleziona una coltura dal catalogo per modificarne i parametri ottimali.")
         self.sottotitolo.setStyleSheet(
             "font-size: 18px; color: rgba(255, 255, 255, 0.5); border: none; background: transparent;")
@@ -66,7 +67,7 @@ class AggiornaParametriColtureOperatore(QWidget):
 
         self.layout_card.addSpacing(10)
 
-        # Contenitore dinamico
+        # contenitore dinamico
         self.layout_contenuto_dinamico = QHBoxLayout()
         self.layout_card.addLayout(self.layout_contenuto_dinamico)
 
@@ -76,6 +77,7 @@ class AggiornaParametriColtureOperatore(QWidget):
         self.layout_card.addWidget(self.label_messaggio)
         self.layout_card.addSpacing(10)
 
+        # pulsante "annulla"
         self.btn_annulla = QPushButton("Annulla e torna al Menù Operatore")
         self.btn_annulla.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_annulla.setStyleSheet("""
@@ -98,17 +100,20 @@ class AggiornaParametriColtureOperatore(QWidget):
 
     def showEvent(self, event):
         super().showEvent(event)
+        # recupera utente corrente dal sistema   
         if hasattr(self.proiettore_pagine, 'utente_corrente') and self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
             self.operatore = utente.nome if hasattr(utente, 'nome') else utente[0]
         self.ripristina_schermata_iniziale()
 
     def estrai_dizionario_catalogo(self):
+        # recupera catalogo colture dal gestore
         catalogo = self.gestore_colture.get_catalogo_aggiornato
         if callable(catalogo):
             return catalogo()
         return catalogo
 
+    # mostra tutte le colture disponibili come bottoni
     def mostra_griglia_colture(self):
         self.svuota_layout_dinamico()
 
@@ -130,12 +135,11 @@ class AggiornaParametriColtureOperatore(QWidget):
                 chiave_colture = ["basilico"]
             catalogo = {c: {} for c in chiave_colture}
 
-        colonne = 4  # Modifica il numero di colonne per adattarle alla griglia
+        colonne = 4  
         riga = 0
         colonna = 0
 
         for nome_coltura in catalogo.keys():
-            # Pulsanti con dimensioni fisse identici alla rimozione serra
             btn_coltura = QPushButton(f"{nome_coltura.upper()}")
             btn_coltura.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_coltura.setFixedSize(140, 90)
@@ -195,7 +199,6 @@ class AggiornaParametriColtureOperatore(QWidget):
         layout_form = QVBoxLayout(self.contenitore_dinamico_wgt)
         layout_form.setSpacing(12)
 
-        # Inserisco il form mantenendo il design della card
         for chiave, valore in parametri_coltura.items():
             riga_parametro = QFrame()
             riga_parametro.setStyleSheet("""
@@ -209,7 +212,8 @@ class AggiornaParametriColtureOperatore(QWidget):
             layout_riga.setContentsMargins(20, 10, 20, 10)
 
             label_nome_parametro = QLabel(f"{chiave.replace('_', ' ').upper()}:")
-            label_nome_parametro.setStyleSheet("font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.8); border:none;")
+            label_nome_parametro.setStyleSheet(
+                "font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.8); border:none;")
 
             input_valore_parametro = QLineEdit()
             input_valore_parametro.setText(str(valore))
@@ -232,7 +236,7 @@ class AggiornaParametriColtureOperatore(QWidget):
         layout_bottoni_azione = QHBoxLayout()
         layout_bottoni_azione.setSpacing(15)
 
-        btn_indietro = QPushButton("↩ Torna alla lista")
+        btn_indietro = QPushButton("Torna alla lista")
         btn_indietro.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_indietro.setStyleSheet("""
             QPushButton {
@@ -267,27 +271,48 @@ class AggiornaParametriColtureOperatore(QWidget):
         if not self.pianta_selezionata:
             return
 
-        # Tentiamo il salvataggio
+        dati_da_salvare = {}
         try:
             for tipo_parametro, campo_input in self.inputs_parametri.items():
                 valore_testo = campo_input.text().strip()
+                if "." in valore_testo:
+                    try:
+                        nuovo_valore = float(valore_testo)
+                    except ValueError:
+                        nuovo_valore = valore_testo
+                else:
+                    try:
+                        nuovo_valore = int(valore_testo)
+                    except ValueError:
+                        nuovo_valore = valore_testo
+                dati_da_salvare[tipo_parametro] = nuovo_valore
 
-                # Chiamata al gestore (che ora contiene la tua logica di validazione)
-                esito = self.gestore_colture.aggiornamento_parametri_catalogo(
-                    self.pianta_selezionata, tipo_parametro, valore_testo
+            catalogo_ram = self.estrai_dizionario_catalogo()
+            if self.pianta_selezionata not in catalogo_ram:
+                catalogo_ram[self.pianta_selezionata] = {}
+
+            for tipo_parametro, nuovo_dato in dati_da_salvare.items():
+                self.gestore_colture.aggiornamento_parametri_catalogo(
+                    pianta=self.pianta_selezionata, tipo_parametro=tipo_parametro, nuovo_dato=nuovo_dato
                 )
+                catalogo_ram[self.pianta_selezionata][tipo_parametro] = nuovo_dato
 
-                if not esito:
-                    # GESTIONE MESSAGGIO DI ERRORE
-                    self.label_messaggio.setStyleSheet("color: #FF3B30; font-weight: 600; font-size: 14px;")
-                    self.label_messaggio.setText("Attenzione: hai inserito un valore fuori scala o non valido!")
-                    return  # Blocchiamo il salvataggio se un parametro è errato
+            # salvataggio su file json
+            try:
+                with open("data/colture.json", "w", encoding="utf-8") as f:
+                    json.dump(catalogo_ram, f, indent=4, ensure_ascii=False)
+                scrittura_ok = True
+            except:
+                scrittura_ok = False
 
-            # Se arriviamo qui, tutto è andato a buon fine
-            self.label_messaggio.setStyleSheet("color: #34C759; font-weight: 600; font-size: 14px;")
-            self.label_messaggio.setText(f"✔ Parametri di '{self.pianta_selezionata.upper()}' salvati!")
-            self.sender().setEnabled(False)
-            QTimer.singleShot(2000, self.torna_al_menu_operatore)
+            if scrittura_ok:
+                self.label_messaggio.setStyleSheet("color: #34C759; font-weight: 600; font-size: 15px;")
+                self.label_messaggio.setText(f"Parametri di '{self.pianta_selezionata.upper()}' salvati!")
+                self.sender().setEnabled(False)
+                QTimer.singleShot(2000, self.torna_al_menu_operatore)
+            else:
+                self.label_messaggio.setStyleSheet("color: #FF3B30; font-weight: 600;")
+                self.label_messaggio.setText("Errore: Impossibile scrivere le modifiche.")
 
         except Exception as e:
             self.label_messaggio.setStyleSheet("color: #FF3B30; font-weight: 600;")
