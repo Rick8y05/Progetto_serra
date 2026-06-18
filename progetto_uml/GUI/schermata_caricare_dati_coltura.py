@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame, QLineEdit
 from PyQt6.QtCore import Qt, QTimer
 
-# caricamento dati colture
+
 class SchermataCaricareDatiColtura(QWidget):
     def __init__(self, proiettore_pagine, gestore_serra, gestore_coltura):
         super().__init__()
@@ -10,6 +10,7 @@ class SchermataCaricareDatiColtura(QWidget):
         self.proprietario = ""
         self.gestore_coltura = gestore_coltura
 
+        # Variabili di stato per tracciare la selezione corrente senza usare lambda complesse nel salvataggio
         self.pianta_corrente = ""
         self.fabbrica_corrente = False
 
@@ -18,26 +19,33 @@ class SchermataCaricareDatiColtura(QWidget):
         self.busto = None
         self.altezza = None
 
-        # layout principale
+        # Definiamo un layout principale fisso per l'intero Widget di base
         self.layout_principale_schermata = QVBoxLayout(self)
         self.layout_principale_schermata.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        # Prima build all'avvio
         self.selezione_coltura()
 
     def svuota_schermata(self):
-        # pulisce il contenuto della schermata
-        while self.layout_principale_schermata.count():
-            item = self.layout_principale_schermata.takeAt(0)
-            widget = item.widget()
-            if widget is not None:
-                widget.setParent(None)
-                widget.deleteLater()
-            elif item.layout() is not None:
-                self.svuota_sub_layout(item.layout())
-            del item
+        """Pulisce in sicurezza il layout principale senza distruggerlo."""
+        # Recupera il layout attuale
+        layout = self.layout_principale_schermata
+        if layout is not None:
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    # Invece di deleteLater che a volte è asincrono e causa race conditions,
+                    # usiamo il setParent(None) per scollegarlo subito
+                    widget.hide()
+                    widget.setParent(None)
+                    widget.deleteLater()
+                # Se c'è un sotto-layout, lo puliamo ricorsivamente
+                elif item.layout() is not None:
+                    self.svuota_sub_layout(item.layout())
 
     def svuota_sub_layout(self, layout):
-        # pulisce i sotto-layout
+        """Metodo ricorsivo per pulire i sotto-layout interni ed evitare leak di memoria."""
         while layout.count():
             item = layout.takeAt(0)
             widget = item.widget()
@@ -49,7 +57,7 @@ class SchermataCaricareDatiColtura(QWidget):
             del item
 
     def svuota_layout_bottoni(self):
-        # svuota il contenitore dei pulsanti delle colture
+        """Svuota specificamente il contenitore dei pulsanti orizzontali delle colture."""
         if self.layout_bottoni_colture is not None:
             while self.layout_bottoni_colture.count():
                 item = self.layout_bottoni_colture.takeAt(0)
@@ -59,7 +67,6 @@ class SchermataCaricareDatiColtura(QWidget):
                     widget.deleteLater()
                 del item
 
-    # schermata 1
     def selezione_coltura(self):
         self.svuota_schermata()
 
@@ -85,14 +92,12 @@ class SchermataCaricareDatiColtura(QWidget):
         self.layout_card.setContentsMargins(50, 50, 50, 50)
         self.layout_card.setSpacing(20)
 
-        # titolo schermata
         titolo = QLabel("CARICARE DATI COLTURA")
         titolo.setStyleSheet(
             "font-size: 36px; font-weight: 700; letter-spacing: -0.5px; color: #FFFFFF; border: none; background: transparent;")
         titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout_card.addWidget(titolo)
 
-        # sottotitolo schermata
         self.sottotitolo = QLabel("Seleziona la coltura presente nella tua serra")
         self.sottotitolo.setStyleSheet("font-size: 18px; color: rgba(255, 255, 255, 0.5); border: none; background: transparent;")
         self.sottotitolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -100,7 +105,6 @@ class SchermataCaricareDatiColtura(QWidget):
 
         self.layout_card.addSpacing(10)
 
-        # bottoni colture
         self.layout_bottoni_colture = QHBoxLayout()
         self.layout_bottoni_colture.setSpacing(15)
         self.layout_card.addLayout(self.layout_bottoni_colture)
@@ -130,9 +134,9 @@ class SchermataCaricareDatiColtura(QWidget):
 
         self.layout_principale_schermata.addWidget(card_centrale)
 
+        # Recupero dinamico dal backend
         colture_disponibili = self.gestore_coltura.colture_disponibili()
 
-        # se non vi sono colture disponibili, errore
         if not colture_disponibili:
             label_vuota = QLabel("Al momento non sono presenti colture da selezionare")
             label_vuota.setStyleSheet(
@@ -142,7 +146,6 @@ class SchermataCaricareDatiColtura(QWidget):
 
         self.layout_bottoni_colture.addStretch(1)
 
-        # se pianta disponibile, vengono restituiti i dati relativi
         for pianta in colture_disponibili:
             btn_colture = QPushButton(f"{pianta}")
             btn_colture.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -166,7 +169,6 @@ class SchermataCaricareDatiColtura(QWidget):
 
         self.layout_bottoni_colture.addStretch(1)
 
-    # schermata 2
     def selezione_tipo_impostazioni(self, pianta):
         self.svuota_schermata()
 
@@ -192,14 +194,12 @@ class SchermataCaricareDatiColtura(QWidget):
         self.layout_card.setContentsMargins(50, 50, 50, 50)
         self.layout_card.setSpacing(20)
 
-        # titolo
         titolo = QLabel("CARICARE DATI COLTURA")
         titolo.setStyleSheet(
             "font-size: 36px; font-weight: 700; letter-spacing: -0.5px; color: #FFFFFF; border: none; background: transparent;")
         titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout_card.addWidget(titolo)
 
-        # sottotitolo 
         self.sottotitolo = QLabel("Seleziona il tipo di impostazioni che hai usato per la tua coltura")
         self.sottotitolo.setStyleSheet(
             "font-size: 18px; color: rgba(255, 255, 255, 0.5); border: none; background: transparent;")
@@ -208,7 +208,6 @@ class SchermataCaricareDatiColtura(QWidget):
 
         self.layout_card.addSpacing(10)
 
-        # bottoni colture
         self.layout_bottoni_colture = QHBoxLayout()
         self.layout_bottoni_colture.setSpacing(15)
         self.layout_card.addLayout(self.layout_bottoni_colture)
@@ -219,7 +218,6 @@ class SchermataCaricareDatiColtura(QWidget):
         self.layout_card.addWidget(self.label_messaggio)
         self.layout_card.addSpacing(10)
 
-        # pulsante annulla e torna indietro
         btn_annulla = QPushButton("Annulla e torna indietro")
         btn_annulla.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_annulla.setStyleSheet("""
@@ -241,7 +239,6 @@ class SchermataCaricareDatiColtura(QWidget):
 
         self.layout_bottoni_colture.addStretch(1)
 
-        # bottoni scelta modalità
         btn_personalizzato = QPushButton("Impostazioni\npersonalizzate")
         btn_fabbrica = QPushButton("Impostazioni\ndi fabbrica")
         btn_personalizzato.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -273,7 +270,6 @@ class SchermataCaricareDatiColtura(QWidget):
         self.layout_bottoni_colture.addWidget(btn_fabbrica)
         self.layout_bottoni_colture.addStretch(1)
 
-    # schermata 3
     def inserimento_parametri_fenotipici(self, fabbrica: bool, pianta: str):
         self.pianta_corrente = pianta
         self.fabbrica_corrente = fabbrica
@@ -302,14 +298,12 @@ class SchermataCaricareDatiColtura(QWidget):
         layout_card.setContentsMargins(50, 50, 50, 50)
         layout_card.setSpacing(25)
 
-        # titolo
         titolo = QLabel("CARICARE DATI COLTURA")
         titolo.setStyleSheet(
             "font-size: 36px; font-weight: 700; letter-spacing: -0.5px; color: #FFFFFF; border: none; background: transparent;")
         titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout_card.addWidget(titolo)
 
-        # sottotitolo
         sottotitolo1 = QLabel(f"Inserisci dati fenotipici per {pianta}")
         sottotitolo1.setStyleSheet(
             "font-size: 13px; color: rgba(255, 255, 255, 0.5); border: none; background: transparent;")
@@ -317,7 +311,7 @@ class SchermataCaricareDatiColtura(QWidget):
         layout_card.addWidget(sottotitolo1)
         layout_card.addSpacing(15)
 
-        # input busto pianta
+        # BUSTO
         layout_input1 = QVBoxLayout()
         label_id1 = QLabel("BUSTO PIANTE")
         label_id1.setStyleSheet(
@@ -343,14 +337,13 @@ class SchermataCaricareDatiColtura(QWidget):
         layout_input1.addWidget(self.busto)
         layout_card.addLayout(layout_input1)
 
-        # 
+        # ALTEZZA
         layout_input2 = QVBoxLayout()
         label_id2 = QLabel("ALTEZZA PIANTE")
         label_id2.setStyleSheet(
             "font-size: 11px; font-weight: 700; letter-spacing: 1px; color: rgba(255, 255, 255, 0.4); border: none; background: transparent;")
         layout_input2.addWidget(label_id2)
 
-        # input altezza pianta
         self.altezza = QLineEdit()
         self.altezza.setPlaceholderText("Inserisci altezza piante in cm...")
         self.altezza.setStyleSheet("""
@@ -370,6 +363,7 @@ class SchermataCaricareDatiColtura(QWidget):
         layout_input2.addWidget(self.altezza)
         layout_card.addLayout(layout_input2)
 
+        # AREA MESSAGGI DINAMICI
         self.label_messaggio = QLabel("")
         self.label_messaggio.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_messaggio.setStyleSheet("font-size: 14px; font-weight: 500; border: none; background: transparent;")
@@ -377,7 +371,7 @@ class SchermataCaricareDatiColtura(QWidget):
 
         layout_card.addSpacing(10)
 
-        # pulsanti annulla e salva
+        # Pulsanti annulla e salva
         layout_bottoni = QHBoxLayout()
         layout_bottoni.setSpacing(15)
 
@@ -431,7 +425,6 @@ class SchermataCaricareDatiColtura(QWidget):
         testo_altezza = self.altezza.text().strip()
         testo_busto = self.busto.text().strip()
 
-        # controlla che tutti i campi siano stati compilati
         if not testo_altezza or not testo_busto:
             self.label_messaggio.setStyleSheet("color: #FF3B30; font-weight: 600; border: none; background: transparent;")
             self.label_messaggio.setText("Errore: Compila tutti i campi prima di salvare!")
@@ -461,12 +454,15 @@ class SchermataCaricareDatiColtura(QWidget):
             self.label_messaggio.setText("")
         self.proiettore_pagine.setCurrentIndex(0)
 
+    # RISOLUZIONE: Quando lo stack visualizza questa schermata, aggiorna l'utente e RIGENERA la vista iniziale delle colture
     def showEvent(self, event):
         super().showEvent(event)
 
+        # 1. Recupero utente (senza toccare la GUI)
         if self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
             self.proprietario = utente.nome if hasattr(utente, 'nome') else utente[0]
 
-        self.svuota_layout_bottoni()
+        # 2. Invece di pulire freneticamente, andiamo direttamente alla selezione
+        # Rimuovi la chiamata a svuota_layout_bottoni() qui, è ridondante.
         self.selezione_coltura()
