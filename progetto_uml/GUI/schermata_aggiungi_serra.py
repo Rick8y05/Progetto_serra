@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFrame
 from PyQt6.QtCore import Qt, QTimer
 
-# schermata per aggiungere una serra
+
 class SchermataAggiungiSerra(QWidget):
     def __init__(self, proiettore_pagine, gestore_serra):
         super().__init__()
@@ -37,7 +37,6 @@ class SchermataAggiungiSerra(QWidget):
         layout_card.setContentsMargins(50, 50, 50, 50)
         layout_card.setSpacing(25)
 
-        # titolo schermata
         titolo = QLabel("Nuova Serra")
         titolo.setStyleSheet("""
             QLabel {
@@ -52,7 +51,6 @@ class SchermataAggiungiSerra(QWidget):
         titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout_card.addWidget(titolo)
 
-        # sottotitolo schermata
         sottotitolo = QLabel("Registra una nuova serra nel sistema.")
         sottotitolo.setStyleSheet(
             "font-size: 13px; color: rgba(255, 255, 255, 0.5); border: none; background: transparent;")
@@ -60,7 +58,6 @@ class SchermataAggiungiSerra(QWidget):
         layout_card.addWidget(sottotitolo)
         layout_card.addSpacing(15)
 
-        # input numero univoco serre
         layout_input = QVBoxLayout()
         label_id = QLabel("NUMERO UNIVOCO SERRE")
         label_id.setStyleSheet("""
@@ -104,7 +101,6 @@ class SchermataAggiungiSerra(QWidget):
         layout_bottoni = QHBoxLayout()
         layout_bottoni.setSpacing(15)
 
-        # pulsante annulla
         btn_annulla = QPushButton("Annulla")
         btn_annulla.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_annulla.setStyleSheet("""
@@ -124,7 +120,6 @@ class SchermataAggiungiSerra(QWidget):
         """)
         btn_annulla.clicked.connect(self.torna_al_menu)
 
-        # bottone salva
         btn_salva = QPushButton("Registra Serra")
         btn_salva.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_salva.setStyleSheet("""
@@ -161,11 +156,10 @@ class SchermataAggiungiSerra(QWidget):
     def salva_serra_nella_logica(self):
         n_univoco = self.n_univoco.text().strip()
 
-        # controllo validità del numero univoco
         if n_univoco == "":
             self.label_messaggio.setStyleSheet("color: #FF3B30; font-weight: 600; background: transparent;")
             self.label_messaggio.setText("Inserisci un numero univoco della serra valido.")
-            return  # return per evitare di continuare se vuoto
+            return  # AGGIUNTO UN RETURN PER EVITARE DI CONTINUARE L'ESECUZIONE SE VUOTO
 
         successo, messaggio = self.gestore_serra.aggiungi_serra(n_univoco, self.proprietario)
 
@@ -173,15 +167,17 @@ class SchermataAggiungiSerra(QWidget):
             self.label_messaggio.setStyleSheet("color: #34C759; font-weight: 600; background: transparent;")
             self.label_messaggio.setText(f" {messaggio}")
 
-            # aggiornamento dizionari schermate coinvolte
+            # --- AGGIORNAMENTO DIZIONARIO SCHERMATE COINVOLTE ---
+            # Cerchiamo dinamicamente le schermate all'interno del proiettore_pagine per forzare il refresh
             for i in range(self.proiettore_pagine.count()):
                 widget_corrente = self.proiettore_pagine.widget(i)
 
+                # Sostituisci 'SchermataRimuoviSerra' e 'aggiorna_pulsanti_serre' con i veri nomi che usi nel tuo progetto
                 if hasattr(widget_corrente, 'aggiorna_pulsanti_serre'):
                     widget_corrente.aggiorna_pulsanti_serre()
                 elif hasattr(widget_corrente, 'aggiorna_lista_serre'):
                     widget_corrente.aggiorna_lista_serre()
-            # ritorno al menu dopo 1.2 secondi
+
             QTimer.singleShot(1200, self.torna_al_menu)
         else:
             self.label_messaggio.setStyleSheet("color: #FF3B30; font-weight: 600; background: transparent;")
@@ -190,8 +186,10 @@ class SchermataAggiungiSerra(QWidget):
     def showEvent(self, event):
         super().showEvent(event)
 
+        # 1. Controllo di sicurezza: se l'utente non c'è ancora, evita il caricamento
         if self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
-            self.proprietario = getattr(utente, 'full_name', None) or getattr(utente, 'nome', None) or (utente[0] if isinstance(utente, (list, tuple)) and len(utente) > 0 else str(utente))
-        else:
-            self.proprietario = None
+            # Recupera il nome se è un oggetto, o l'indice [0] se è una lista/tupla
+            self.proprietario = utente.nome if hasattr(utente, 'nome') else utente[0]
+
+        # 2. Metti QUI i metodi che caricano i dati (es. aggiorna pulsanti, liste, tabelle)  # Metti il nome del tuo metodo di refresh
