@@ -105,7 +105,7 @@ class VisualizzaDatiSerra(QWidget):
 
         if self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
-            self.proprietario = utente.nome if hasattr(utente, 'nome') else utente[0]
+            self.proprietario = getattr(utente, 'full_name', None) or getattr(utente, 'nome', None) or (utente[0] if isinstance(utente, (list, tuple)) and len(utente) > 0 else str(utente))
 
         if hasattr(self, 'label_messaggio') and self.label_messaggio:
             self.label_messaggio.setText("")
