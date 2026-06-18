@@ -1,173 +1,149 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QFrame
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton,QApplication
+from PyQt6.QtCore import Qt, QTimer
 
-
-class MenuProprietarioGUI(QWidget):
-
-    def __init__(self, stack, auth, serra_service):
+class InterfacciaMacOS(QWidget):
+    def __init__(self, gestore_serra, gestore_colture, gestore_tempo,proiettore_pagine):
         super().__init__()
+        self.gestore_serra = gestore_serra
+        self.gestore_colture = gestore_colture
+        self.gestore_tempo = gestore_tempo
+        self.nome_proprietario = ""
+        self.proiettore_pagine = proiettore_pagine
+        # titolo finestra
+        self.setWindowTitle("Pannello di Controllo Serra")
+        #self.resize(650, 450)  # Stile box Apple trovato su internet
 
-        self.stack = stack
-        self.auth = auth
-        self.serra_service = serra_service
+        # Inizializziamo la grafica pulita
+        self.finestra_principale()
 
-        self.init_ui()
-
-    def init_ui(self):
-
+    def finestra_principale(self):
+        # Ora il metodo è indentato correttamente dentro la classe!
         self.setStyleSheet("""
             QWidget {
-                background-color: transparent;
-                color: white;
-                font-family: '.AppleSystemUIFont', 'SF Pro Display';
+                font-family: '.AppleSystemUIFont', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
             }
-        """)
+        """) #font del testo della apple
 
-        layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        #layout verticale
+        layout_principale = QVBoxLayout()
+        layout_principale.setContentsMargins(50, 60, 50, 60)#margini
+        layout_principale.setSpacing(0)#spazio tra i bordi rimosso
 
-        # ---------------- CARD ----------------
-        card = QFrame()
-        card.setFixedWidth(650)
-        card.setStyleSheet("""
-            QFrame {
-                background-color: rgba(255,255,255,0.04);
-                border: 1px solid rgba(255,255,255,0.1);
-                border-radius: 24px;
-            }
-        """)
 
-        card_layout = QVBoxLayout(card)
-        card_layout.setSpacing(12)
+        self.setObjectName("FinestraPrincipale")
+        self.setStyleSheet("""
+                     QWidget#FinestraPrincipale {
+                         background: transparent;
+                     }""")
+        #sfondo trasparente dato che ora avendo il proiettore si occupa lui di metterlo in tutte le interfacce
 
-        # ---------------- WELCOME ----------------
-        self.label_benvenuto = QLabel("")
-        self.label_benvenuto.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.label_benvenuto.setStyleSheet("""
-            font-size: 20px;
-            font-weight: 700;
-            background-color: #1E3A8A;
-        """)
-        card_layout.addWidget(self.label_benvenuto)
+        testo_benvenuto = QLabel(f"Benvenuto {self.nome_proprietario}")
+        testo_benvenuto.setStyleSheet("font-size: 32px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.5px;")#settaggio caratteri
+        testo_benvenuto.setAlignment(Qt.AlignmentFlag.AlignCenter)#allinea al centro il titolo
 
-        # ---------------- TITOLO ----------------
-        titolo = QLabel("MENU PROPRIETARIO")
-        titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        titolo.setStyleSheet("font-size: 30px; font-weight: 700;")
-        card_layout.addWidget(titolo)
-
-        sottotitolo = QLabel("Gestione completa sistema serre")
+        sottotitolo = QLabel("Pannello di controllo software della serra automatizzata")
+        sottotitolo.setStyleSheet("font-size: 14px; color: #B0C4DE; font-weight: 400; margin-top: 8px;")
         sottotitolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        sottotitolo.setStyleSheet("color: rgba(255,255,255,0.5); font-size: 13px;")
-        card_layout.addWidget(sottotitolo)
 
-        # ---------------- STATUS LABEL ----------------
-        self.status = QLabel("")
-        self.status.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.status.setStyleSheet("color: #007AFF; font-size: 13px;")
-        card_layout.addWidget(self.status)
+        layout_principale.addWidget(testo_benvenuto)
+        layout_principale.addWidget(sottotitolo)
 
-        # ---------------- BUTTON FACTORY ----------------
-        def crea_btn(testo, funzione):
-            btn = QPushButton(testo)
-            btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            btn.setStyleSheet("""
-                QPushButton {
-                    background-color: rgba(255,255,255,0.06);
-                    border: 1px solid rgba(255,255,255,0.1);
-                    border-radius: 12px;
-                    padding: 12px;
-                    font-size: 15px;
-                }
-                QPushButton:hover {
-                    background-color: rgba(255,255,255,0.12);
-                }
-            """)
-            btn.clicked.connect(funzione)
-            return btn
+        layout_principale.addSpacing(50)
 
-        # ---------------- OPZIONI ----------------
-        card_layout.addWidget(crea_btn("1 - Visualizza utenti", self.visualizza_utenti))
-        card_layout.addWidget(crea_btn("2 - Visualizza serre", self.visualizza_serre))
-        card_layout.addWidget(crea_btn("3 - Modalità funzionamento", self.modalita))
-        card_layout.addWidget(crea_btn("4 - Controllo dispositivi", self.dispositivi))
-        card_layout.addWidget(crea_btn("5 - Configura coltura", self.coltura))
-        card_layout.addWidget(crea_btn("6 - Plancia dati", self.plancia))
-        card_layout.addWidget(crea_btn("7 - Logout", self.logout))
+        #contenitore pulsanti effetto vetro, modello online
+        pannello_comandi = QWidget()
+        pannello_comandi.setStyleSheet("""
+            QWidget {
+                background-color: rgba(255, 255, 255, 0.07);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                border-radius: 16px;
+            }
+        """)
 
-        layout.addWidget(card)
-        self.setLayout(layout)
+        layout_bottoni = QVBoxLayout(pannello_comandi)#vertical box per pulsanti
+        layout_bottoni.setContentsMargins(25, 25, 25, 25)
+        layout_bottoni.setSpacing(14)
+
+        btn_aggiungi_serra = QPushButton("Aggiungi Serra")
+        btn_aggiungi_serra.clicked.connect(lambda: self.proiettore_pagine.setCurrentIndex(1))#lambda serve a dire al python non eseguire subito ma metti la funzione proiettore in una funzione chiusa temporanea e aspetta che il bottone venga cliccato
+        btn_rimuovi_serra = QPushButton("Rimuovi Serra")
+        btn_rimuovi_serra.clicked.connect(lambda: self.proiettore_pagine.setCurrentIndex(2))
+        btn_configura_parametri_coltura = QPushButton("Configura Parametri Coltura")
+        btn_configura_parametri_coltura.clicked.connect(lambda: self.proiettore_pagine.setCurrentIndex(3))
+        btn_caricare_dati_coltura = QPushButton("Caricare Dati Coltura")
+        btn_caricare_dati_coltura.clicked.connect(lambda: self.proiettore_pagine.setCurrentIndex(4))
+        btn_visualizza_dati_serra = QPushButton("Visualizza Dati Serra")
+        btn_visualizza_dati_serra.clicked.connect(lambda: self.proiettore_pagine.setCurrentIndex(5))
+        btn_azionamento_disp = QPushButton("Azionamento Attuatori")
+        btn_azionamento_disp.clicked.connect(lambda: self.proiettore_pagine.setCurrentIndex(6))
+        btn_seleziona_mod = QPushButton("Selezione Modalità Funzionamento")
+        btn_seleziona_mod.clicked.connect(lambda: self.proiettore_pagine.setCurrentIndex(7))
+        btn_exit = QPushButton("Esci")
+        btn_exit.clicked.connect(QApplication.quit)
+
+        stile_mac_premium = """
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: #FFFFFF;
+                font-size: 14px;
+                font-weight: 500;
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                border-radius: 10px;
+                padding: 14px 28px;
+                min-width: 280px;
+                text-align: center;
+            }
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.2);
+                border-color: rgba(255, 255, 255, 0.3);
+            }
+            QPushButton:pressed {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+        """
+        #assegnazione stile ai bottoni
+        btn_aggiungi_serra.setStyleSheet(stile_mac_premium)
+        btn_rimuovi_serra.setStyleSheet(stile_mac_premium)
+        btn_configura_parametri_coltura.setStyleSheet(stile_mac_premium)
+        btn_caricare_dati_coltura.setStyleSheet(stile_mac_premium)
+        btn_visualizza_dati_serra.setStyleSheet(stile_mac_premium)
+        btn_azionamento_disp.setStyleSheet(stile_mac_premium)
+        btn_seleziona_mod.setStyleSheet(stile_mac_premium)
+        btn_exit.setStyleSheet(stile_mac_premium)
+        #assegnazione stile ai bottoni
+        #gestione logica bottoni
+        btn_aggiungi_serra.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_rimuovi_serra.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_seleziona_mod.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_visualizza_dati_serra.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_exit.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_azionamento_disp.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_caricare_dati_coltura.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_configura_parametri_coltura.setCursor(Qt.CursorShape.PointingHandCursor)
 
 
-    # ---------------- HEADER USER ----------------
-    def mostra_utente(self):
-        utente = self.stack.utente_corrente
-        if utente:
-            self.label_benvenuto.setText(f"Benvenuto, {utente.nome} (proprietario)")
-        else:
-            self.label_benvenuto.setText("Benvenuto")
+        layout_bottoni.addWidget(btn_aggiungi_serra, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout_bottoni.addWidget(btn_rimuovi_serra, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout_bottoni.addWidget(btn_configura_parametri_coltura, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout_bottoni.addWidget(btn_caricare_dati_coltura, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout_bottoni.addWidget(btn_visualizza_dati_serra, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout_bottoni.addWidget(btn_azionamento_disp, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout_bottoni.addWidget(btn_seleziona_mod, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout_bottoni.addWidget(btn_exit, alignment=Qt.AlignmentFlag.AlignCenter)
 
-    # ---------------- FEEDBACK UI ----------------
-    def set_status(self, msg, color="#007AFF"):
-        self.status.setText(msg)
-        self.status.setStyleSheet(f"color: {color}; font-size: 13px;")
+        layout_principale.addWidget(pannello_comandi, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout_principale.addStretch(1)
 
-    # ---------------- FUNZIONI ----------------
+        self.setLayout(layout_principale)
 
-    def visualizza_utenti(self):
-        utenti = self.auth.get_utenti()
-        self.set_status(f"Utenti: {len(utenti)}")
+    def showEvent(self, event):
+        super().showEvent(event)
 
-    def visualizza_serre(self):
-        dati = self.serra_service.get_dati_plancia()
-        self.set_status(f"Serre attive: {len(dati)}")
+        # 1. Controllo di sicurezza: se l'utente non c'è ancora, evita il caricamento
+        if self.proiettore_pagine.utente_corrente is not None:
+            utente = self.proiettore_pagine.utente_corrente
+            # Recupera il nome se è un oggetto, o l'indice [0] se è una lista/tupla
+            self.proprietario = utente.nome if hasattr(utente, 'nome') else utente[0]
 
-    def modalita(self):
-        self.serra_service.set_modalita("automatica")
-        self.set_status("Modalità impostata: automatica", "#34C759")
-
-    def dispositivi(self):
-        self.serra_service.azione_manuale("serra1", "1", "on")
-        self.set_status("Dispositivo azionato", "#34C759")
-
-    def coltura(self):
-        self.set_status("Vai alla schermata coltura (da collegare)", "#FF9500")
-
-    def plancia(self):
-        dati = self.serra_service.get_dati_plancia()
-        self.set_status(f"Dati plancia aggiornati ({len(dati)} serre)")
-
-    def logout(self):
-        self.auth.logout()
-        self.stack.setCurrentIndex(0)
-
-    def aggiorna_utente(self):
-        utente = getattr(self.stack, "utente_corrente", None)
-
-        if utente is None:
-            self.label_benvenuto.setText("Benvenuto")
-            return
-
-        nome = getattr(utente, "nome", None)
-
-        if not nome:
-            nome = utente.email  # fallback utile
-
-        self.label_benvenuto.setText(f"Benvenuto, {nome}")
-
-    def visualizza_utenti(self):
-        utenti = self.auth.get_utenti()
-
-        print("\n=== UTENTI ===")
-        for email, u in utenti.items():
-            print(f"{email} - {u['ruolo']} - {u['nome']}")
-
-    def visualizza_serre(self):
-        dati = self.serra_service.get_dati_plancia()
-
-        print("\n=== SERRA ===")
-        for codice, info in dati.items():
-            print(f"\nCodice: {codice}")
-            print(f"Temperatura: {info.get('temperatura')}")
-            print(f"Umidità: {info.get('umidita')}")
-            print(f"Modalità: {info.get('modalita')}")
+        # 2. Metti QUI i metodi che caricano i dati (es. aggiorna pulsanti, liste, tabelle)
+          # Metti il nome del tuo metodo di refresh
