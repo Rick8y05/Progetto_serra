@@ -294,7 +294,7 @@ class AzionamentoAttuatori(QWidget):
         super().showEvent(event)
         if self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
-            self.proprietario = utente.nome if hasattr(utente, 'nome') else utente[0]
+            self.proprietario = getattr(utente, 'full_name', None) or getattr(utente, 'nome', None) or (utente[0] if isinstance(utente, (list, tuple)) and len(utente) > 0 else str(utente))
 
         self.label_messaggio.setText("")
         # Usiamo un piccolissimo delay asincrono (50ms) per evitare il crash di ricorsione del layout in Qt6
