@@ -1,7 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton,QApplication
 from PyQt6.QtCore import Qt, QTimer
 
-# schermata principale del sistema
 class InterfacciaMacOS(QWidget):
     def __init__(self, gestore_serra, gestore_colture, gestore_tempo,proiettore_pagine):
         super().__init__()
@@ -17,31 +16,30 @@ class InterfacciaMacOS(QWidget):
         # Inizializziamo la grafica pulita
         self.finestra_principale()
 
-    # costruzione interfaccia principale
     def finestra_principale(self):
-        # stile generale schermata
+        # Ora il metodo è indentato correttamente dentro la classe!
         self.setStyleSheet("""
             QWidget {
                 font-family: '.AppleSystemUIFont', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
             }
-        """) # font del testo della apple
+        """) #font del testo della apple
 
-        # layout verticale
+        #layout verticale
         layout_principale = QVBoxLayout()
-        layout_principale.setContentsMargins(50, 60, 50, 60) # margini
-        layout_principale.setSpacing(0) # spazio tra i bordi rimosso
+        layout_principale.setContentsMargins(50, 60, 50, 60)#margini
+        layout_principale.setSpacing(0)#spazio tra i bordi rimosso
 
-        # sfondo trasparente
+
         self.setObjectName("FinestraPrincipale")
         self.setStyleSheet("""
                      QWidget#FinestraPrincipale {
                          background: transparent;
                      }""")
-    
-        # messaggio di benvenuto
+        #sfondo trasparente dato che ora avendo il proiettore si occupa lui di metterlo in tutte le interfacce
+
         testo_benvenuto = QLabel(f"Benvenuto {self.nome_proprietario}")
-        testo_benvenuto.setStyleSheet("font-size: 32px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.5px;") # caratteri
-        testo_benvenuto.setAlignment(Qt.AlignmentFlag.AlignCenter) # allinea al centro il titolo
+        testo_benvenuto.setStyleSheet("font-size: 32px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.5px;")#settaggio caratteri
+        testo_benvenuto.setAlignment(Qt.AlignmentFlag.AlignCenter)#allinea al centro il titolo
 
         sottotitolo = QLabel("Pannello di controllo software della serra automatizzata")
         sottotitolo.setStyleSheet("font-size: 14px; color: #B0C4DE; font-weight: 400; margin-top: 8px;")
@@ -52,7 +50,7 @@ class InterfacciaMacOS(QWidget):
 
         layout_principale.addSpacing(50)
 
-        # contenitore pulsanti effetto vetro, modello online
+        #contenitore pulsanti effetto vetro, modello online
         pannello_comandi = QWidget()
         pannello_comandi.setStyleSheet("""
             QWidget {
@@ -62,12 +60,12 @@ class InterfacciaMacOS(QWidget):
             }
         """)
 
-        layout_bottoni = QVBoxLayout(pannello_comandi)
+        layout_bottoni = QVBoxLayout(pannello_comandi)#vertical box per pulsanti
         layout_bottoni.setContentsMargins(25, 25, 25, 25)
         layout_bottoni.setSpacing(14)
 
         btn_aggiungi_serra = QPushButton("Aggiungi Serra")
-        btn_aggiungi_serra.clicked.connect(lambda: self.proiettore_pagine.setCurrentIndex(1)) # lambda serve a dire al python "non eseguire subito, ma metti la funzione "proiettore" in una funzione chiusa temporanea e aspetta che il bottone venga cliccato"
+        btn_aggiungi_serra.clicked.connect(lambda: self.proiettore_pagine.setCurrentIndex(1))#lambda serve a dire al python non eseguire subito ma metti la funzione proiettore in una funzione chiusa temporanea e aspetta che il bottone venga cliccato
         btn_rimuovi_serra = QPushButton("Rimuovi Serra")
         btn_rimuovi_serra.clicked.connect(lambda: self.proiettore_pagine.setCurrentIndex(2))
         btn_configura_parametri_coltura = QPushButton("Configura Parametri Coltura")
@@ -83,7 +81,6 @@ class InterfacciaMacOS(QWidget):
         btn_exit = QPushButton("Esci")
         btn_exit.clicked.connect(QApplication.quit)
 
-        # stile unico per bottoni
         stile_mac_premium = """
             QPushButton {
                 background-color: rgba(255, 255, 255, 0.1);
@@ -104,7 +101,7 @@ class InterfacciaMacOS(QWidget):
                 background-color: rgba(255, 255, 255, 0.05);
             }
         """
-        # assegnazione stile ai bottoni
+        #assegnazione stile ai bottoni
         btn_aggiungi_serra.setStyleSheet(stile_mac_premium)
         btn_rimuovi_serra.setStyleSheet(stile_mac_premium)
         btn_configura_parametri_coltura.setStyleSheet(stile_mac_premium)
@@ -113,8 +110,8 @@ class InterfacciaMacOS(QWidget):
         btn_azionamento_disp.setStyleSheet(stile_mac_premium)
         btn_seleziona_mod.setStyleSheet(stile_mac_premium)
         btn_exit.setStyleSheet(stile_mac_premium)
-        
-        # gestione logica bottoni
+        #assegnazione stile ai bottoni
+        #gestione logica bottoni
         btn_aggiungi_serra.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_rimuovi_serra.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_seleziona_mod.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -142,8 +139,11 @@ class InterfacciaMacOS(QWidget):
     def showEvent(self, event):
         super().showEvent(event)
 
+        # 1. Controllo di sicurezza: se l'utente non c'è ancora, evita il caricamento
         if self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
-            self.nome_proprietario = (
-                utente.nome if hasattr(utente, 'nome') else utente[0]
-            )
+            # Recupera il nome se è un oggetto, o l'indice [0] se è una lista/tupla
+            self.proprietario = utente.nome if hasattr(utente, 'nome') else utente[0]
+
+        # 2. Metti QUI i metodi che caricano i dati (es. aggiorna pulsanti, liste, tabelle)
+          # Metti il nome del tuo metodo di refresh
