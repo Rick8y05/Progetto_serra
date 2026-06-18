@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame
 from PyQt6.QtCore import Qt, QTimer
 
-# azionamento attuatori
+
 class AzionamentoAttuatori(QWidget):
     def __init__(self, proiettore_pagine, gestore_serra, gestore_colture):
         super().__init__()
@@ -13,7 +13,7 @@ class AzionamentoAttuatori(QWidget):
         self.contenitore_dashboard = None
         self.serra_corrente_attiva = None
 
-        # stato temporaneo attuatori
+        # Dizionario per memorizzare lo stato dei comandi prima del salvataggio effettivo
         self.stati_temporanei = {"ventole": False, "irrigatore": False, "lampada": False}
 
         self.inizializza_interfaccia()
@@ -44,7 +44,6 @@ class AzionamentoAttuatori(QWidget):
         self.layout_card.setContentsMargins(50, 50, 50, 50)
         self.layout_card.setSpacing(20)
 
-        # titolo schermata
         titolo = QLabel("AZIONAMENTO ATTUATORI")
         titolo.setStyleSheet("""
             QLabel {
@@ -59,16 +58,13 @@ class AzionamentoAttuatori(QWidget):
         titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout_card.addWidget(titolo)
 
-        # sottotitolo schermata 
         self.sottotitolo = QLabel("Seleziona la serra su cui desideri operare")
-        self.sottotitolo.setStyleSheet(
-            "font-size: 18px; color: rgba(255, 255, 255, 0.5); border: none; background: transparent;")
+        self.sottotitolo.setStyleSheet("font-size: 18px; color: rgba(255, 255, 255, 0.5); border: none; background: transparent;")
         self.sottotitolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout_card.addWidget(self.sottotitolo)
 
         self.layout_card.addSpacing(10)
 
-        # bottoni serre
         self.layout_bottoni_serre = QHBoxLayout()
         self.layout_bottoni_serre.setSpacing(15)
         self.layout_card.addLayout(self.layout_bottoni_serre)
@@ -82,7 +78,6 @@ class AzionamentoAttuatori(QWidget):
         layout_comandi_bassi = QHBoxLayout()
         layout_comandi_bassi.setSpacing(15)
 
-        # bottone per annullare e tornare al menu
         self.btn_annulla = QPushButton("Annulla e torna al Menù")
         self.btn_annulla.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_annulla.setStyleSheet("""
@@ -99,7 +94,6 @@ class AzionamentoAttuatori(QWidget):
         """)
         self.btn_annulla.clicked.connect(self.torna_al_menu)
 
-        # bottone per salvare lo stato degli attuatori
         self.btn_salva = QPushButton("Salva Impostazioni")
         self.btn_salva.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_salva.setVisible(False)
@@ -130,7 +124,6 @@ class AzionamentoAttuatori(QWidget):
     def aggiorna_pulsanti_serre(self):
         self.svuota_layout_bottoni()
         self.btn_salva.setVisible(False)
-        # recupero serre dell’utente
         n_univoci_proprietario = self.gestore_serra.parco_serre_proprietario(self.proprietario)
 
         if not n_univoci_proprietario:
@@ -142,7 +135,6 @@ class AzionamentoAttuatori(QWidget):
 
         self.layout_bottoni_serre.addStretch(1)
 
-        #bottone serra 
         for n_univoco in n_univoci_proprietario:
             btn_serra = QPushButton(f"SERRA \n{n_univoco}")
             btn_serra.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -167,17 +159,19 @@ class AzionamentoAttuatori(QWidget):
 
         self.layout_bottoni_serre.addStretch(1)
 
-    # selezione stato attuatori
     def schermata_seleziona_stato_attuatori(self, n_univoco):
+        # 1. Recuperiamo la modalità dal tuo backend
         mod = self.gestore_serra.get_modalita(n_univoco)
 
+        # 2. Controllo stringa: se automatica, blocca l'azione e mostra l'errore in rosso senza rompere la griglia
         if self.gestore_serra.serre_attive[n_univoco].modalita in ["automatico"]:
             self.label_messaggio.setStyleSheet(
                 "font-size: 14px; font-weight: 600; color: #FF3B30; border: none; background: transparent;")
             self.label_messaggio.setText(
-                f"Errore: la SERRA {n_univoco} è in modalità Automatica! Vai in 'Selezione Modalità Funzionamento' per cambiarla.")
+                f"✕ Errore: la SERRA {n_univoco} è in modalità Automatica! Vai in 'Selezione Modalità Funzionamento' per cambiarla.")
             return
 
+        # 3. Solo se è in Manuale procediamo a svuotare e mostrare il pannello di controllo
         self.label_messaggio.setText("")
         self.svuota_layout_bottoni()
         self.serra_corrente_attiva = n_univoco
@@ -191,7 +185,6 @@ class AzionamentoAttuatori(QWidget):
         dashboard_layout.setContentsMargins(0, 0, 0, 0)
 
         dati_attuali = self.gestore_serra.visualizza_stato_serre(n_univoco)
-        # inizializzazione stati temporanei
         self.stati_temporanei["ventole"] = dati_attuali[2] if dati_attuali else False
         self.stati_temporanei["irrigatore"] = dati_attuali[3] if dati_attuali else False
         self.stati_temporanei["lampada"] = dati_attuali[4] if dati_attuali else False
@@ -215,12 +208,10 @@ class AzionamentoAttuatori(QWidget):
             def imposta_stile_tasto(attivo):
                 if attivo:
                     btn.setText("ON")
-                    btn.setStyleSheet(
-                        "background-color: #4CAF50; border: none; border-radius: 8px; font-weight: 700; color: white;")
+                    btn.setStyleSheet("background-color: #4CAF50; border: none; border-radius: 8px; font-weight: 700; color: white;")
                 else:
                     btn.setText("OFF")
-                    btn.setStyleSheet(
-                        "background-color: #555555; border: none; border-radius: 8px; font-weight: 700; color: rgba(255,255,255,0.6);")
+                    btn.setStyleSheet("background-color: #555555; border: none; border-radius: 8px; font-weight: 700; color: rgba(255,255,255,0.6);")
 
             imposta_stile_tasto(self.stati_temporanei[chiave_stato])
 
@@ -242,7 +233,7 @@ class AzionamentoAttuatori(QWidget):
 
         dashboard_layout.addWidget(card_comandi)
 
-        btn_indietro = QPushButton("Seleziona un'altra serra")
+        btn_indietro = QPushButton("Seleziona un'altra Serra")
         btn_indietro.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_indietro.setStyleSheet("""
             QPushButton {
@@ -271,7 +262,6 @@ class AzionamentoAttuatori(QWidget):
             self.ripristina_schermata_selezione()
             self.proiettore_pagine.setCurrentIndex(0)
 
-    # ritorno alla schermata iniziale
     def ripristina_schermata_selezione(self):
         self.serra_corrente_attiva = None
         self.btn_salva.setVisible(False)
@@ -304,7 +294,8 @@ class AzionamentoAttuatori(QWidget):
         super().showEvent(event)
         if self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
-            self.proprietario = getattr(utente, 'full_name', None) or getattr(utente, 'nome', None) or (utente[0] if isinstance(utente, (list, tuple)) and len(utente) > 0 else str(utente))
+            self.proprietario = utente.nome if hasattr(utente, 'nome') else utente[0]
 
         self.label_messaggio.setText("")
+        # Usiamo un piccolissimo delay asincrono (50ms) per evitare il crash di ricorsione del layout in Qt6
         QTimer.singleShot(50, self.ripristina_schermata_selezione)
