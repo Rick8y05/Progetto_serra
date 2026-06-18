@@ -139,11 +139,8 @@ class InterfacciaMacOS(QWidget):
     def showEvent(self, event):
         super().showEvent(event)
 
-        # 1. Controllo di sicurezza: se l'utente non c'è ancora, evita il caricamento
+        # Controllo di sicurezza: se l'utente non c'è ancora, evita il caricamento
         if self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
-            # Recupera il nome se è un oggetto, o l'indice [0] se è una lista/tupla
-            self.proprietario = utente.nome if hasattr(utente, 'nome') else utente[0]
+            self.proprietario = getattr(utente, 'full_name', None) or getattr(utente, 'nome', None) or (utente[0] if isinstance(utente, (list, tuple)) and len(utente) > 0 else str(utente))
 
-        # 2. Metti QUI i metodi che caricano i dati (es. aggiorna pulsanti, liste, tabelle)
-          # Metti il nome del tuo metodo di refresh
