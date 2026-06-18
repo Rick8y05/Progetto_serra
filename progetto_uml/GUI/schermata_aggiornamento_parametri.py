@@ -1,4 +1,3 @@
-
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFrame, QGridLayout
 from PyQt6.QtCore import Qt, QTimer
 
@@ -100,7 +99,7 @@ class AggiornaParametriColtureOperatore(QWidget):
         super().showEvent(event)
         if hasattr(self.proiettore_pagine, 'utente_corrente') and self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
-            self.operatore = utente.nome if hasattr(utente, 'nome') else utente[0]
+            self.operatore = getattr(utente, 'full_name', None) or getattr(utente, 'nome', None) or (utente[0] if isinstance(utente, (list, tuple)) and len(utente) > 0 else str(utente))
         self.ripristina_schermata_iniziale()
 
     def estrai_dizionario_catalogo(self):
