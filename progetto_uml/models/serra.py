@@ -93,7 +93,3 @@ class Serra:
         self.U1.aggiornamento_sensore()
         self.temperatura_serra = self.T1.get_dati()
         self.umidita_serra = self.U1.get_dati()
-#postilla le serre accedono a tutte le coture dunque non bisogna mandargli direttamente i dati basta mandargli
-# il nome della pianta, dunque il flow è gestore colture trova se ce quella pianta, manda a gestore serre
-#che punta a quella precisa serra e gli ivia
-#sentire al prof per quanto riguarda il fatto della repository dentro ogni serra
