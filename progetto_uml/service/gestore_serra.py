@@ -8,8 +8,8 @@ class GestoreSerra:
         self.gestore_colture = gestore_colture
         self.dati_serra = dati_serra
         # dizionario di dizionari organizzato per codice univoco con sotto tutto per creare serra
-        self.serre_attive={} #dizionario per mantenere vivi gli oggetti serra
-        #usi ["modalita"]quando dizionario .modalita quando è un attributo di un oggetto istanziato
+        self.serre_attive={} # dizionario per mantenere vivi gli oggetti serra
+        # usi ["modalita"] quando dizionario .modalita quando è un attributo di un oggetto istanziato
         for n_univoco, info_serra in self.dati_serra.items():
             nome_pianta = info_serra["pianta_selezionata"]
             dati_singola_pianta = self.gestore_colture.configurazione_parametri_coltura(nome_pianta)
@@ -32,9 +32,9 @@ class GestoreSerra:
 
 
     def verifica_esistenza_serra(self, n_univoco):
-        return n_univoco in self.serre_attive #se presente rilascia true altrimenti false
+        return n_univoco in self.serre_attive # se presente, rilascia true altrimenti false
     # controlla che il codice univoco sia presente
-    # aggiungi e rimuovi serra non rimuovono dal database cambiano i propietari e asseganno ad uno nuovo
+    # aggiungi e rimuovi serra non rimuovono dal database, cambiano i propietari e asseganno ad uno nuovo
     # serve per aggiungere un proprietario ad una serra vuota
     def aggiungi_serra(self,n_univoco,proprietario):
        if self.verifica_esistenza_serra(n_univoco):
@@ -46,17 +46,17 @@ class GestoreSerra:
        else:
            return False, "Numero univoco inesistente nel catalogo "
    
-    # rimuove il rporietario da una serra
+    # rimuove il proprietario da una serra
     def rimuovi_serra(self,n_univoco,proprietario: str):
-        #if self.verifica_esistenza_serra(n_univoco):
-            #if self.serre_attive[n_univoco].proprietario== proprietario:
+        # if self.verifica_esistenza_serra(n_univoco):
+            # if self.serre_attive[n_univoco].proprietario== proprietario:
                 self.serre_attive[n_univoco].proprietario = "nessuno"
                 return True, "Serra rimossa con successo"
-            #else:
-                #print("questa serra apparrtiene ad un altro proprietario")
-        #else:
-            #print("numero univoco inesistente")
-    # i comandi messi a commento sono quelli che servivano per linterfaccia di test
+            # else:
+                # print("questa serra appartiene ad un altro proprietario")
+        # else:
+            # print("numero univoco inesistente")
+    # i comandi messi a commento sono quelli che servivano per l'interfaccia di test
     # con la GUI parte degli errori vengono visualizzati a schermo
     # metodo utilizzato per selezionare modalità (automatica o manuale)
     def selezione_modalita(self,n_univoco,modalita):
@@ -138,7 +138,7 @@ class GestoreSerra:
     # quelle che puo usare, senza correrere il rischio che gestisca anche serre non sue
     def parco_serre_proprietario(self,proprietario: str):
         serre_proprietario = []
-        for n_univoco, serra in self.serre_attive.items():#.items(): il ciclo dice per ogni n_univoco ho serre in serre attive, items restituisce la chiave e loggetto serra
+        for n_univoco, serra in self.serre_attive.items():  # .items(): il ciclo dice per ogni n_univoco ho serre in serre attive, items restituisce la chiave e l'oggetto serra
             if serra.proprietario == proprietario:
                 serre_proprietario.append(n_univoco)
         return serre_proprietario
