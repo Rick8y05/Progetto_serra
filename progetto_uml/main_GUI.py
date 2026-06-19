@@ -43,7 +43,7 @@ gestore_autenticazione = Autenticazione()
 
 # inizializzazione_gestori
 # avvio simulazione sensori
-# proprietario="Alessio Menotti"
+# proprietario = "Alessio Menotti"
 # utente = "operatore"
 # numero_operatore = "op_15"
 
@@ -51,8 +51,8 @@ gestore_autenticazione = Autenticazione()
 gestore_tempo.avvia()
 
 # interfacce
-app = QApplication(sys.argv)#serve a creare l'applicazione
-proiettore_pagine = QStackedWidget()#è il direttore che consente il cambio schermata fluido
+app = QApplication(sys.argv) # serve a creare l'applicazione
+proiettore_pagine = QStackedWidget() # è il direttore che consente il cambio schermata fluido
 proiettore_pagine.setStyleSheet("""
     QStackedWidget {
         background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
@@ -63,7 +63,8 @@ proiettore_pagine.setStyleSheet("""
     QWidget {
         font-family: '.AppleSystemUIFont', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
     }
-""")#settiamo la grafica al proiettore perchè se la lasciamo alla singola finestra viene sovrascritta e non si vede
+""")
+# settiamo la grafica al proiettore, perchè se la lasciamo alla singola finestra viene sovrascritta e non si visualizza
 
 # creazione schermate
 menu_principale_proprietario = InterfacciaMacOS(gestore_serra,gestore_colture,gestore_tempo,proiettore_pagine)
@@ -88,18 +89,18 @@ proiettore_pagine.addWidget(schermata_configura_parametri_coltura) #3
 proiettore_pagine.addWidget(schermata_caricare_dati_coltura) #4
 proiettore_pagine.addWidget(schermata_visualizza_dati_serra) #5
 proiettore_pagine.addWidget(schermata_azionamento_attuatori) #6
-proiettore_pagine.addWidget(schermata_seleziona_modalita_funzionamento)#7
-proiettore_pagine.addWidget(schermata_menu_operatore)#8
-proiettore_pagine.addWidget(schermata_visualizza_dati_serra_operatore)#9
-proiettore_pagine.addWidget(schermata_aggiorna_parametri_colture)#10
-proiettore_pagine.addWidget(schermata_login)#11
-proiettore_pagine.addWidget(schermata_registrazione)#12
+proiettore_pagine.addWidget(schermata_seleziona_modalita_funzionamento) #7
+proiettore_pagine.addWidget(schermata_menu_operatore) #8
+proiettore_pagine.addWidget(schermata_visualizza_dati_serra_operatore) #9
+proiettore_pagine.addWidget(schermata_aggiorna_parametri_colture) #10
+proiettore_pagine.addWidget(schermata_login) #11
+proiettore_pagine.addWidget(schermata_registrazione) #12
 
 # schermata iniziale
 proiettore_pagine.setCurrentIndex(11)
 
-proiettore_pagine.showFullScreen() # fa vedere linterfaccia
-status = app.exec() # ciclo loop infinito e velocissimo dell' interfaccia grafica fatto apposta per lasciare in attesa l'interfaccia dell'utente
+proiettore_pagine.showFullScreen() # fa vedere l'interfaccia
+status = app.exec() # ciclo loop infinito e velocissimo dell'interfaccia grafica fatto apposta per lasciare in attesa l'interfaccia dell'utente
 
 # salvataggio dati 
 repository_serre.salvatggio_dati(gestore_serra.dati_salvataggio)
