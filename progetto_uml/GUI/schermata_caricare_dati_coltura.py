@@ -10,7 +10,7 @@ class SchermataCaricareDatiColtura(QWidget):
         self.proprietario = ""
         self.gestore_coltura = gestore_coltura
 
-        # Variabili di stato per tracciare la selezione corrente senza usare lambda complesse nel salvataggio
+        # Variabili di stato
         self.pianta_corrente = ""
         self.fabbrica_corrente = False
 
@@ -22,25 +22,20 @@ class SchermataCaricareDatiColtura(QWidget):
         # Definiamo un layout principale fisso per l'intero Widget di base
         self.layout_principale_schermata = QVBoxLayout(self)
         self.layout_principale_schermata.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        # Prima build all'avvio
         self.selezione_coltura()
 
     def svuota_schermata(self):
-        """Pulisce in sicurezza il layout principale senza distruggerlo."""
-        # Recupera il layout attuale
+        # Pulisce in sicurezza il layout principale senza distruggerlo.
         layout = self.layout_principale_schermata
         if layout is not None:
             while layout.count():
                 item = layout.takeAt(0)
                 widget = item.widget()
                 if widget is not None:
-                    # Invece di deleteLater che a volte è asincrono e causa race conditions,
-                    # usiamo il setParent(None) per scollegarlo subito
                     widget.hide()
                     widget.setParent(None)
                     widget.deleteLater()
-                # Se c'è un sotto-layout, lo puliamo ricorsivamente
+                # Se c'è un sotto-layout, lo puliamo
                 elif item.layout() is not None:
                     self.svuota_sub_layout(item.layout())
 
@@ -134,7 +129,7 @@ class SchermataCaricareDatiColtura(QWidget):
 
         self.layout_principale_schermata.addWidget(card_centrale)
 
-        # Recupero dinamico dal backend
+        # recupero colture disponibili
         colture_disponibili = self.gestore_coltura.colture_disponibili()
 
         if not colture_disponibili:
@@ -454,15 +449,13 @@ class SchermataCaricareDatiColtura(QWidget):
             self.label_messaggio.setText("")
         self.proiettore_pagine.setCurrentIndex(0)
 
-    # RISOLUZIONE: Quando lo stack visualizza questa schermata, aggiorna l'utente e RIGENERA la vista iniziale delle colture
+    # Quando lo stack visualizza questa schermata, aggiorna l'utente
     def showEvent(self, event):
         super().showEvent(event)
 
-        # 1. Recupero utente (senza toccare la GUI)
+        # Recupero utente
         if self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
             self.proprietario = getattr(utente, 'full_name', None) or getattr(utente, 'nome', None) or (utente[0] if isinstance(utente, (list, tuple)) and len(utente) > 0 else str(utente))
 
-        # 2. Invece di pulire freneticamente, andiamo direttamente alla selezione
-        # Rimuovi la chiamata a svuota_layout_bottoni() qui, è ridondante.
         self.selezione_coltura()
