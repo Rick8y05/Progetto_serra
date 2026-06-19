@@ -160,10 +160,10 @@ class AzionamentoAttuatori(QWidget):
         self.layout_bottoni_serre.addStretch(1)
 
     def schermata_seleziona_stato_attuatori(self, n_univoco):
-        # 1. Recuperiamo la modalità dal tuo backend
+        # recuepro modalità 
         mod = self.gestore_serra.get_modalita(n_univoco)
 
-        # 2. Controllo stringa: se automatica, blocca l'azione e mostra l'errore in rosso senza rompere la griglia
+        # controllo stringa: se "automatica", blocca l'azione e mostra l'errore in rosso senza rompere la griglia
         if self.gestore_serra.serre_attive[n_univoco].modalita in ["automatico"]:
             self.label_messaggio.setStyleSheet(
                 "font-size: 14px; font-weight: 600; color: #FF3B30; border: none; background: transparent;")
@@ -171,7 +171,7 @@ class AzionamentoAttuatori(QWidget):
                 f"✕ Errore: la SERRA {n_univoco} è in modalità Automatica! Vai in 'Selezione Modalità Funzionamento' per cambiarla.")
             return
 
-        # 3. Solo se è in Manuale procediamo a svuotare e mostrare il pannello di controllo
+        # solo se è in "manuale" procediamo a svuotare e mostrare il pannello di controllo
         self.label_messaggio.setText("")
         self.svuota_layout_bottoni()
         self.serra_corrente_attiva = n_univoco
@@ -297,5 +297,4 @@ class AzionamentoAttuatori(QWidget):
             self.proprietario = getattr(utente, 'full_name', None) or getattr(utente, 'nome', None) or (utente[0] if isinstance(utente, (list, tuple)) and len(utente) > 0 else str(utente))
 
         self.label_messaggio.setText("")
-        # Usiamo un piccolissimo delay asincrono (50ms) per evitare il crash di ricorsione del layout in Qt6
         QTimer.singleShot(50, self.ripristina_schermata_selezione)
