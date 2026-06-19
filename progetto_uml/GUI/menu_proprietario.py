@@ -17,7 +17,6 @@ class InterfacciaMacOS(QWidget):
         self.finestra_principale()
 
     def finestra_principale(self):
-        # Ora il metodo è indentato correttamente dentro la classe!
         self.setStyleSheet("""
             QWidget {
                 font-family: '.AppleSystemUIFont', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
