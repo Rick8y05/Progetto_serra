@@ -193,16 +193,16 @@ class SchermataConfiguraParametriColtura(QWidget):
         self.label_messaggio.setText("")
         self.proiettore_pagine.setCurrentIndex(0)
 
-    # RISOLUZIONE: Quando lo stack carica la vista, aggiorna l'utente in sicurezza e rigenera i bottoni delle serre
+    # Quando lo stack carica la vista, aggiorna l'utente in sicurezza e rigenera i bottoni delle serre
     def showEvent(self, event):
         super().showEvent(event)
 
-        # 1. Controllo di sicurezza sull'utente corrente dello stack
+        # Controllo di sicurezza sull'utente corrente dello stack
         if self.proiettore_pagine.utente_corrente is not None:
             utente = self.proiettore_pagine.utente_corrente
             self.proprietario = getattr(utente, 'full_name', None) or getattr(utente, 'nome', None) or (utente[0] if isinstance(utente, (list, tuple)) and len(utente) > 0 else str(utente))
 
-        # 2. Resetta i vecchi messaggi, svuota il layout e rigenera le serre del proprietario
+        # Reset dei vecchi messaggi, svuotamento del layout e rigenerazione delle serre del proprietario
         if hasattr(self, 'label_messaggio') and self.label_messaggio:
             self.label_messaggio.setText("")
 
