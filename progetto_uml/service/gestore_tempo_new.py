@@ -12,7 +12,7 @@ class GestoreTempo:
 
     # ciclo principale di simulazione temporale
     def loop_tempo(self):
-        #while non è invalidante, gira separatamente da tutto il resto grazie a tred
+        # while non è invalidante, gira separatamente da tutto il resto grazie a "tred"
         while self.simulazione_attiva:
             time.sleep(self.intervallo)  # time slep non invalida perche gira separatamente da tutto il resto
             self.conta_cicli +=1
