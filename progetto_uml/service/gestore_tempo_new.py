@@ -14,7 +14,7 @@ class GestoreTempo:
     def loop_tempo(self):
         # while non è invalidante, gira separatamente da tutto il resto grazie a "tred"
         while self.simulazione_attiva:
-            time.sleep(self.intervallo)  # time slep non invalida perche gira separatamente da tutto il resto
+            time.sleep(self.intervallo)  
             self.conta_cicli +=1
             # effettua chiamata aggiornamento sensori ogni tot. tempo
             self.gestore_serra.simulazione_aggiornamento_sensori()
@@ -25,9 +25,6 @@ class GestoreTempo:
         if not self.simulazione_attiva:
             self.simulazione_attiva = True
             self.thread_tempo = threading.Thread(target=self.loop_tempo, daemon=True)
-            # la riga sopra con target serve a dire "hai creato il ciclo di lavoro alternativo" e deve fare self.loop_tempo, è un puntatore)
-            # "daemon" serve per dire "se il main principale va in arresto, fermati"
-            # di default è su false e metterlo su true è una sicurezza in più anche se abbiamo fatto esci
             self.thread_tempo.start()
 
     # chiusura loop fine simulazione
