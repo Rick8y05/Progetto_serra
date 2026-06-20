@@ -5,7 +5,10 @@ import os
 class UtentiRepository:
 
     def __init__(self):
-        # percorso del file utenti.json dentro la cartella data
+        """
+        INIZIALIZZAZIONE CLASSE 
+        """
+        
         self.path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "..", "data", "utenti.json")
         )
