@@ -1,4 +1,3 @@
-from repository.lettore_dati import DatiRepository
 
 class GestoreColture:
     def __init__(self, dati_colture: dict , dati_colture_utente: dict ):
