@@ -1,10 +1,15 @@
 from models.serra import Serra
 
 
-# classe che gestisce tutte le serre del sistema, sia inserimento/rimozione serra che la logica dell'hardware
+
 class GestoreSerra:
+	"""
+	classe che gestisce tutte le serre del sistema, sia inserimento/rimozione serra che la logica dell'hardware
+	"""
     def __init__ (self,dati_serra: dict, dati_temperature, dati_umidita, gestore_colture): 
-		""" INIZIALIZZAZIONE GESTORE SERRA """
+		""" 
+		INIZIALIZZAZIONE GESTORE SERRA 
+		"""
         self.dati_temperatura = dati_temperature
         self.dati_umidita = dati_umidita
         self.gestore_colture = gestore_colture
@@ -35,7 +40,7 @@ class GestoreSerra:
             print(f"Il codice {n_univoco} non esiste ")
             return []
 
-	""" metodo che controlla se il codice univoco è presente e quindi esistenza serra """
+	
     def verifica_esistenza_serra(self, n_univoco):
 		""" 
 		Metodo che controlla se il codice univoco è presente e quindi esistenza serra 
@@ -172,10 +177,10 @@ class GestoreSerra:
 
 
     def parco_serre_proprietario(self,proprietario: str):
-	""" 
-	Metodo per definire le serre che ha a disposizione il proprietario, quindi solamente 
-	quelle che puo usare, senza correrere il rischio che gestisca anche serre non sue 
-	"""
+		""" 
+		Metodo per definire le serre che ha a disposizione il proprietario, quindi solamente 
+		quelle che puo usare, senza correrere il rischio che gestisca anche serre non sue 
+		"""
         serre_proprietario = []
         for n_univoco, serra in self.serre_attive.items():  # .items(): il ciclo dice per ogni n_univoco ho serre in serre attive, items restituisce la chiave e l'oggetto serra
             if serra.proprietario == proprietario:
