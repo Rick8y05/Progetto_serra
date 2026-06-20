@@ -49,7 +49,7 @@ Il proprietario può inserire:
 
 -altezza della pianta;
 
--dimensione del busto della pianta 
+-dimensione del busto della pianta.
 
 Deve specificare se ha usato impostazioni per la coltivazione diverse da quelle di fabbrica
 
@@ -86,6 +86,6 @@ Alessio Menotti
 Leonardo Barelli
 
 # Implementazione
-Implementato in Python 3, rispettando il pattern ECB(Entity-Control-Boundary)
+Implementato in Python 3, rispettando il pattern ECB(Entity-Control-Boundary).
 
-Progetto sviluppato per il corso di ingegneria del software e programmazione
+Progetto sviluppato per il corso di ingegneria del software e programmazione.
