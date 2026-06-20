@@ -24,9 +24,9 @@ class Sensori:
     # property per ottenere il tipo del sensore
     @property
     def tipo(self) -> str:
-    """
-    Metodo per ottenere il tipo del sensore
-    """
+        """
+        Metodo per ottenere il tipo del sensore
+        """
         return self._tipo
 
     
