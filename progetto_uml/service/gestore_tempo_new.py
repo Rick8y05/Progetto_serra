@@ -1,8 +1,11 @@
 import threading
 import time
 
-# classe che gestisce la simulazione del tempo nel sistema
+
 class GestoreTempo:
+    """
+    Classe che gestisce la simulazione del tempo nel sistema
+    """
     def __init__(self, gestore_serra, intervallo: float):
         """
         INIZIALIZZAZIONE GESTORE TEMPO
