@@ -1,13 +1,19 @@
-# definizione classe Utente con nome, cognome, email, password, ruolo assegnato (proprietario/operatore)
+
 class Utente:
+    """
+    Rappresenta un utente del sistema
+    """
     def __init__(self, nome, cognome, email, password, ruolo=""):
+        """
+        Inizializzazione utente
+        """
         self.nome = nome.strip()
         self.cognome = cognome.strip()
         self.email = email.strip()
         self.password = password.strip()
         self.ruolo = ruolo.strip().lower()
 
-    # restituisce una rappresentazione testuale dell'oggetto, utile per debug e stampa delle informazioni principali
+    
     @property
     def full_name(self):
         if self.cognome:
