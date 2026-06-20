@@ -8,11 +8,17 @@ class Autenticazione:
     OPERATORE = "operatore"
 
     def __init__(self):
+        """
+        INIZIALIZZAZIONE CLASSE AUTENTICAZIONE
+        """
         self.repo = UtentiRepository()
         self.utente_corrente = None
 
-    # login utente registrato con email e password (verificate nel file utenti.json)
+    
     def login(self, email, password):
+        """
+        Metodo di login utente registrato con email e password 
+        """
         email = email.strip()
         password = password.strip()
 
@@ -23,11 +29,13 @@ class Autenticazione:
             if u["email"] == email and u["password"] == password:
                 # crea un nuovo oggetto Utente, supportando anche il cognome
                 return Utente(u["nome"], u.get("cognome", ""), u["email"], u["password"], u["ruolo"])
-
         return None
 
-    # registrazione di un nuovo proprietario
+   
     def register_proprietario(self, nome, cognome, email, password):
+        """
+        Metodo di registrazione di un nuovo proprietario
+        """
         nome = nome.strip()
         cognome = cognome.strip()
         email = email.strip()
@@ -79,11 +87,17 @@ class Autenticazione:
         self.repo.save_all(utenti)
         return True, "Registrazione completata"
 
-    # utenti
+   
     def get_utenti(self):
+        """
+        Getter utenti
+        """
         utenti = self.repo.get_all()
         return {u["email"]: u for u in utenti}
 
-    # termine sessione
+    
     def logout(self):
+        """
+        Termine sessione
+        """
         self.utente_corrente = None
