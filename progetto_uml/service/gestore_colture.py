@@ -11,7 +11,7 @@ class GestoreColture:
     
     def aggiornamento_parametri_catalogo(self, pianta, tipo_parametro, nuovo_dato):
         """
-        Metodo per il cabio di un parametro di una coltura specifica
+        Metodo per il cambio di un parametro di una coltura specifica
         """
         try:
             controllo_valore = float(nuovo_dato)
@@ -53,7 +53,7 @@ class GestoreColture:
     
     def caricamento_dati_fenotipici(self,pianta:str, proprietario: str, busto: float, altezza: float, impostazioni: bool):
         """
-        Metodo con cui il proprietario inserisci i nuovi dati fenotipici per la pianta 
+        Metodo con cui il proprietario inserisce i nuovi dati fenotipici per la pianta 
         """
         if pianta in self.dati_colture:
             dati_nuovi= {"pianta": pianta,
@@ -68,7 +68,7 @@ class GestoreColture:
     
     def rimuovi_dati_utente(self, proprietario: str):
         """
-        Metodo per la rimozione dei dati caricati da un proprietario nell file dati colture utente 
+        Metodo per la rimozione dei dati caricati da un proprietario nel file dati colture utente 
         """
         if proprietario in self.dati_colture_utente:
             self.dati_colture_utente.pop(proprietario)
