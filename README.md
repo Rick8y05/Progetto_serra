@@ -85,7 +85,7 @@ Alessio Menotti
 
 Leonardo Barelli
 
-Progetto sviluppato per il corso di ingegneria del software e programmazione
-
 # Implementazione
 Implementato in Python 3, rispettando il pattern ECB(Entity-Control-Boundary)
+
+Progetto sviluppato per il corso di ingegneria del software e programmazione
