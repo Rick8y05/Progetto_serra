@@ -83,8 +83,6 @@ Giovanni Bertozzi
 
 Alessio Menotti
 
-Leonardo Barelli
-
 # Implementazione
 Implementato in Python 3, rispettando il pattern ECB(Entity-Control-Boundary).
 
