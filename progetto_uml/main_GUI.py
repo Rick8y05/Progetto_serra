@@ -3,7 +3,7 @@ def main():
     from service.gestore_colture import GestoreColture
     from service.gestore_serra import GestoreSerra
     from GUI.menu_principale import InterfacciaMacOS
-    from service.gestore_tempo_new import GestoreTempo
+    from service.gestore_tempo import GestoreTempo
     from GUI.schermata_aggiungi_serra import SchermataAggiungiSerra
     from GUI.schermata_rimuovi_serra import SchermataRimuoviSerra
     from GUI.schermata_configura_parametri_coltura import SchermataConfiguraParametriColtura
@@ -36,18 +36,18 @@ def main():
     repository_val_umidita = DatiRepository(path_val_umidita)
     repository_utenti = DatiRepository(path_utenti)
     
-    # inizializzazione_gestori
+
     gestore_colture = GestoreColture(repository_colture.get_dati,repository_dati_colt_utente.get_dati)
     gestore_serra = GestoreSerra(repository_serre.get_dati,repository_val_temperatura.get_dati,repository_val_umidita.get_dati, gestore_colture)
     gestore_tempo = GestoreTempo(gestore_serra,10)
-    gestore_autenticazione = Autenticazione()
+    gestore_autenticazione = Autenticazione(repository_utenti.get_dati)
     
-    # avvio simulazione tempo e sensori
+
     gestore_tempo.avvia()
     
-    # interfacce
-    app = QApplication(sys.argv) # serve a creare l'applicazione
-    proiettore_pagine = QStackedWidget() # è il direttore che consente il cambio schermata fluido
+
+    app = QApplication(sys.argv)
+    proiettore_pagine = QStackedWidget()
     proiettore_pagine.setStyleSheet("""
         QStackedWidget {
             background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
@@ -59,9 +59,8 @@ def main():
             font-family: '.AppleSystemUIFont', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
         }
     """)
-    # settiamo il proiettore per passare da una schermata di un caso d'uso ad un altro
-    
-    # creazione schermate
+
+
     menu_principale_proprietario = InterfacciaMacOS(gestore_serra,gestore_colture,gestore_tempo,proiettore_pagine)
     schermata_aggiungi_serra = SchermataAggiungiSerra(proiettore_pagine, gestore_serra)
     schermata_rimuovi_serra = SchermataRimuoviSerra(proiettore_pagine, gestore_serra)
@@ -99,10 +98,10 @@ def main():
     status = app.exec() 
     
     # salvataggio dati 
-    repository_serre.salvatggio_dati(gestore_serra.dati_salvataggio)
-    repository_dati_colt_utente.salvatggio_dati(gestore_colture.dati_colture_utente)
-    repository_colture.salvatggio_dati(gestore_colture.dati_colture) 
-    
+    repository_serre.salvataggio_dati(gestore_serra.dati_salvataggio)
+    repository_dati_colt_utente.salvataggio_dati(gestore_colture.dati_colture_utente)
+    repository_colture.salvataggio_dati(gestore_colture.dati_colture)
+    repository_utenti.salvataggio_dati(gestore_autenticazione.repo)
     # termine simulazione sensori
     gestore_tempo.ferma()
     
