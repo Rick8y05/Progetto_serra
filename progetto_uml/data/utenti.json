@@ -26,5 +26,19 @@
         "email": "alemeno2005@gmail.com",
         "password": "Rudi1970!",
         "ruolo": "proprietario"
+    },
+    {
+        "nome": "Elena",
+        "cognome": "Menotti",
+        "email": "elena2006@gmail.com",
+        "password": "Elenabella2006!",
+        "ruolo": "proprietario"
+    },
+    {
+        "nome": "Piero",
+        "cognome": "Menotti",
+        "email": "piero1943@gmail.com",
+        "password": "PieroMenotti1943!",
+        "ruolo": "proprietario"
     }
 ]
