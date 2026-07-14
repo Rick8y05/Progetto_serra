@@ -2,7 +2,7 @@ import threading
 import time
 
 
-# classe che gestisce la simulazione del tempo nel sistema
+
 class GestoreTempo:
     def __init__(self, gestore_serra, intervallo: float):
         """
@@ -18,11 +18,11 @@ class GestoreTempo:
         """
         Ciclo principale di simulazione temporale
         """
-        # while non è invalidante, gira separatamente da tutto il resto grazie a "tred"
+       
         while self.simulazione_attiva:
             time.sleep(self.intervallo)
             self.conta_cicli += 1
-            # effettua chiamata aggiornamento sensori ogni tot. tempo
+           
             self.gestore_serra.simulazione_aggiornamento_sensori()
             self.gestore_serra.controllo_periodico()
 
