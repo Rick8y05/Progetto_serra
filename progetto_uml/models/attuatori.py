@@ -28,12 +28,12 @@ class Attuatori:
    
     def accendi(self):
         """
-        Accende attuatore
+        Accendia del attuatore
         """
         self.stato = True
    
     def spegni(self):
         """
-        Spegne attuatore
+        Spegni del attuatore
         """
         self.stato = False
