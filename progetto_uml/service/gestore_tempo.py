@@ -28,7 +28,7 @@ class GestoreTempo:
 
     def avvia(self):
         """
-        chiamata per avviare il loop ad inzio simulazione
+        chiamata per avviare il loop ad inizio simulazione
         """
         if not self.simulazione_attiva:
             self.simulazione_attiva = True
