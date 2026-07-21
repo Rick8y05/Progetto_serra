@@ -28,11 +28,11 @@ CONTROLLO AUTOMATICO
 
 Il sistema gestisce automaticamente irrigazione, ventole di aerazione, lampada UV.
 
-Le decisioni vengono prese in base:
+Le decisioni vengono prese in base ai:
 
--ai valori rilevati dai sensori;
+-valori rilevati dai sensori;
 
--ai parametri della coltura selezionata.
+-parametri della coltura selezionata.
 
 
 GESTIONE COLTURE
@@ -51,7 +51,8 @@ Il proprietario può inserire:
 
 -dimensione del busto della pianta.
 
-Deve specificare se ha usato impostazioni per la coltivazione diverse da quelle di fabbrica
+Deve specificare se ha usato impostazioni per la coltivazione diverse da quelle di fabbrica, cioè se ha usato
+la modalità automatica oppure manuale per le sua coltivazione.
 
 # Requisiti Software
 -Python 3.11 o superiore
