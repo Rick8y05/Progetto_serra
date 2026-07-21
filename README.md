@@ -3,8 +3,8 @@
 
 Sistema di gestione di serre automatizzate dedicate all’agricoltura.
 Il sistema consente il monitoraggio delle condizioni ambientali interne alla serra e il controllo automatico o manuale degli attuatori per garantire condizioni ottimali di crescita delle colture.
-La gestione può essere effettuata localmente dal proprietario tramite una plancia di controllo oppure da remoto dagli operatori dell’azienda per l’aggiornamento delle impostazioni delle colture. 
-(per maggiori informazioni consultare documento Word relativo)
+La gestione può essere effettuata localmente dal proprietario tramite una plancia di controllo oppure da remoto dagli operatori dell’azienda per l’aggiornamento delle impostazioni delle colture 
+(per maggiori informazioni consultare documento Word relativo).
 
 
 # Funzionalità principali
