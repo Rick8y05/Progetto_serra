@@ -52,7 +52,7 @@ Il proprietario può inserire:
 -dimensione del busto della pianta.
 
 Deve specificare se ha usato impostazioni per la coltivazione diverse da quelle di fabbrica, cioè se ha usato
-la modalità automatica oppure manuale per le sua coltivazione.
+la modalità manuale per la sua coltivazione invece che la modalità automatica.
 
 # Requisiti Software
 -Python 3.11 o superiore
