@@ -4,18 +4,18 @@ class GestoreSerra:
     """
     GESTORE SERRA PER IL CONTROLLO DI TUTTE LE SERRE PRESENTI NEL SISTEMA
     """
-    def __init__ (self,dati_serra: dict, dati_temperature, dati_umidita, gestore_colture): #ricordati che è listanza del gestore colture nel main se non funziona devi toglierla
+    def __init__ (self,dati_serra: dict, dati_temperature, dati_umidita, gestore_colture): 
         self.dati_temperatura = dati_temperature
         self.dati_umidita = dati_umidita
         self.gestore_colture = gestore_colture
         self.dati_serra = dati_serra
         self.serre_attive={}
         for n_univoco, info_serra in self.dati_serra.items():
-            #sistemare sotto il discorso che manda path colture, deve mandare solo dati della serra giusta
+           
             nome_pianta = info_serra["pianta_selezionata"]
             dati_singola_pianta = self.gestore_colture.configurazione_parametri_coltura(nome_pianta)
             serra_attivata=Serra(info_serra["proprietario"],dati_singola_pianta,info_serra["modalita"],self.dati_temperatura, self.dati_umidita,n_univoco, nome_pianta) #attiva una delle serre salvate
-            self.serre_attive[n_univoco]=serra_attivata#la mette dentro una lista di serre per mantenerla salvata
+            self.serre_attive[n_univoco]=serra_attivata #la mette dentro una lista di serre per mantenerla salvata
 
 
 
@@ -128,7 +128,7 @@ class GestoreSerra:
 
     def get_modalita(self, n_univoco):
         """
-        Metodo per spere la modalità di una serra
+        Metodo per sapere la modalità di una serra
         """
         if self.verifica_esistenza_serra(n_univoco):
             mod = self.serre_attive[n_univoco].modalita
@@ -163,7 +163,7 @@ class GestoreSerra:
         Metodo che restituisce le serre univoche a seconda del proprietario
         """
         serre_proprietario = []
-        for n_univoco, serra in self.serre_attive.items():#.items(): il ciclo dice per ogni n_univoco ho serre in serre attive, items restituisce la chiave e loggetto serra
+        for n_univoco, serra in self.serre_attive.items():
             if serra.proprietario == proprietario:
                 serre_proprietario.append(n_univoco)
         return serre_proprietario
